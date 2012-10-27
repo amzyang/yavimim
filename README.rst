@@ -3,7 +3,7 @@ yavimim
 
 yet another vim input method
 
-**``yavimim`` 还处于早期开发阶段，目前还不可用！**
+**yavimim 还处于早期开发阶段，目前还不可用！**
 
 目标
 ----
