@@ -133,6 +133,8 @@ function! s:init_buffer()
 	silent execute printf("lnoremap %s %s <Nop>", s:y.map_args, "<End>")
 	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<ESC>",
 				\ "<C-R>=g:do_after_cancel()<CR><ESC>")
+	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<C-E>",
+				\ "<C-R>=g:lmap_ctrl_e()<CR>")
 endfunction
 
 function! s:toggle_options()
@@ -236,6 +238,20 @@ function! g:lmap_bs()
 	silent execute printf('silent return "%s"', key)
 endfunction
 
+function! g:lmap_ctrl_e()
+	if b:yavimim.state == 1
+		let key = '\<C-R>=g:do_after_cancel()\<CR>'
+		if pumvisible()
+			let key .= '\<C-E>'
+		endif
+		let step = col('.') - 1 - b:yavimim.cursor.column
+		let key .= repeat('\<BS>', step)
+	else
+		let key = '\<C-E>'
+	endif
+	silent execute printf('return "%s"', key)
+endfunction
+
 function! g:do_trigger_completion()
 	if pumvisible() && len(b:yavimim.match_lists) == 1
 		silent execute printf('return "%s"',
@@ -251,6 +267,8 @@ endfunction
 function! g:lmap_enter()
 	if pumvisible()
 		let key = '\<C-Y>'
+	elseif b:yavimim.state == 1
+		let key = ''
 	else
 		let key = '\<CR>'
 	endif
