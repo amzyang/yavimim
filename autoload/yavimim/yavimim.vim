@@ -357,7 +357,6 @@ function! g:yavimim_omnifunc(findstart, base)
 		endif
 		return b:yavimim.cursor.column
 	else
-		" let b:yavimim.match_lists = s:get_match_lists(a:base)
 		let l:matches = []
 		let l:index = 1
 		for l:match in b:yavimim.match_lists
