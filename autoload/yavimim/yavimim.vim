@@ -349,8 +349,8 @@ function! g:yavimim_omnifunc(findstart, base)
 	" omnifunc
 	if a:findstart
 		call s:fix_cursor_position()
-		let column = b:yavimim.cursor.column
-		let base = getline(b:yavimim.cursor.line)[column:col('.') - 1]
+		let base = getline(b:yavimim.cursor.line)
+					\[b:yavimim.cursor.column:col('.') - 1]
 		let b:yavimim.match_lists = s:get_match_lists(base)
 		if !len(b:yavimim.match_lists)
 			return -3
