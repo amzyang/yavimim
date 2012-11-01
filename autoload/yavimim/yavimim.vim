@@ -135,6 +135,8 @@ function! s:init_buffer()
 				\ "<C-R>=g:do_after_cancel()<CR><ESC>")
 	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<C-E>",
 				\ "<C-R>=g:lmap_ctrl_e()<CR>")
+	" silent execute printf("lnoremap %s %s %s", s:y.map_args, "<C-U>",
+				" \ "<C-R>=g:do_after_cancel()<CR><C-U>")
 endfunction
 
 function! s:toggle_options()
@@ -320,6 +322,7 @@ endfunction
 function! s:lmap_letter_wubi(char)
 	" 五笔
 	" 检测我们是否已经输入四个可用字母，此时就可以上档了
+	call s:fix_cursor_position()
 	let l:len = col('.') - b:yavimim.cursor.column - 1
 	let key = ''
 	if pumvisible() && (l:len == 4 || len(b:yavimim.match_lists) == 1)
