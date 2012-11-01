@@ -236,6 +236,10 @@ function! g:lmap_bs()
 endfunction
 
 function! g:do_trigger_completion()
+	if pumvisible() && len(b:yavimim.match_lists) == 1
+		silent execute printf('return "%s"',
+					\ '\<C-Y>\<C-R>=g:do_after_commit()\<CR>')
+	endif
 	if pumvisible()
 		silent execute printf('return "%s"', '\<C-P>')
 	endif
