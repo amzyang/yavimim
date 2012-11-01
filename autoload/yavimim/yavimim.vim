@@ -61,7 +61,7 @@ function! s:init()
 	autocmd YaVimIM CursorMovedI * call g:yavimim_cursor_movedi()
 	autocmd YaVimIM InsertEnter * call g:yavimim_start_insert()
 	autocmd YaVimIM InsertLeave * call g:do_after_cancel()
-	autocmd BufWinEnter *
+	autocmd YaVimIM BufWinEnter *
 				\ if !exists('b:vimim') && &l:modifiable
 				\ | let &l:iminsert = 0
 				\ | endif
