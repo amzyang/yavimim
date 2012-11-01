@@ -306,7 +306,8 @@ function! s:lmap_letter_wubi(char)
 	if pumvisible() && (l:len == 4 || len(b:yavimim.match_lists) == 1)
 		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
 	endif
-	let key .= a:char . '\<C-R>=g:do_waiting_commit()\<CR>\<C-X>\<C-O>\<C-R>=g:do_trigger_completion()\<CR>'
+	let key .= a:char . '\<C-R>=g:do_waiting_commit()\<CR>' .
+				\ '\<C-X>\<C-O>\<C-R>=g:do_trigger_completion()\<CR>'
 	silent execute printf('return "%s"', key)
 endfunction
 
@@ -337,7 +338,8 @@ function! s:fix_cursor_position()
 		return
 	endif
 
-	while start > 0 && start > b:yavimim.cursor.column && line[start - 1] =~ '\l'
+	while start > 0 && start > b:yavimim.cursor.column
+				\ && line[start - 1] =~ '\l'
 		let start -= 1
 	endwhile
 	let b:yavimim.cursor.column = start
@@ -347,7 +349,8 @@ function! g:yavimim_omnifunc(findstart, base)
 	" omnifunc
 	if a:findstart
 		call s:fix_cursor_position()
-		let base = getline(b:yavimim.cursor.line)[b:yavimim.cursor.column:col('.') - 1]
+		let column = b:yavimim.cursor.column
+		let base = getline(b:yavimim.cursor.line)[column:col('.') - 1]
 		let b:yavimim.match_lists = s:get_match_lists(base)
 		if !len(b:yavimim.match_lists)
 			return -3
