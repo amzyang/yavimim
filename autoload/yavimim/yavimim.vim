@@ -103,6 +103,7 @@ function! s:init_buffer()
 	let b:yavimim = {}
 	let b:yavimim.match_lists = []
 	let b:yavimim.state = 0
+	let b:yavimim.pmenu = 0
 	call s:set_cursor_position()
 
 	" binding all keys
@@ -136,6 +137,10 @@ function! s:init_buffer()
 				\ "<C-R>=g:do_after_cancel()<CR><ESC>")
 	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<C-E>",
 				\ "<C-R>=g:lmap_ctrl_e()<CR>")
+	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<Up>",
+				\ "<C-R>=g:change_cursor_pmenu_position(-1)<CR><Up>")
+	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<Down>",
+				\ "<C-R>=g:change_cursor_pmenu_position(1)<CR><Down>")
 	" silent execute printf("lnoremap %s %s %s", s:y.map_args, "<C-U>",
 				" \ "<C-R>=g:do_after_cancel()<CR><C-U>")
 endfunction
@@ -155,9 +160,17 @@ function! s:toggle_options()
 	endif
 endfunction
 
+function! g:change_cursor_pmenu_position(change)
+	if pumvisible() && b:yavimim.state == 1
+		let b:yavimim.pmenu += a:change
+	endif
+	return ''
+endfunction
+
 function! g:do_after_commit()
 	let b:yavimim.state = 0
 	let b:yavimim.match_lists = []
+	let b:yavimim.pmenu = 0
 	call s:set_cursor_position()
 	call yavimim#highlight#predict()
 	return ''
@@ -337,8 +350,15 @@ endfunction
 
 function! g:lmap_space()
 	if pumvisible()
-		let key = '\<C-N>\<C-Y>'
-		let key .= '\<C-R>=g:do_after_commit()\<CR>'
+		" 检查 popup menu 是否高亮被选中
+		" :help popupmenu-completion
+		let now = getline(b:yavimim.cursor.line)
+					\[b:yavimim.cursor.column:col('.') - 2]
+		let key = ''
+		if now == b:yavimim.base && b:yavimim.pmenu == 0
+			let key .= '\<C-N>'
+		endif
+		let key .= '\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
 	else
 		let key = '\<Space>\<C-R>=g:set_after_insert_beside_chinese()\<CR>'
 	endif
@@ -375,6 +395,7 @@ function! g:yavimim_omnifunc(findstart, base)
 		call s:fix_cursor_position()
 		let base = getline(b:yavimim.cursor.line)
 					\[b:yavimim.cursor.column:col('.') - 2]
+		let b:yavimim.base = base
 		let b:yavimim.match_lists = s:get_match_lists(base)
 		if !len(b:yavimim.match_lists)
 			return -3
