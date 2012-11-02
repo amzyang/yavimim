@@ -1,4 +1,5 @@
 " vim: set noexpandtab tabstop=4 shiftwidth=4:
+scriptencoding utf-8
 function! yavimim#highlight#predict()
 	let line = line('.')
 	let start = b:yavimim.cursor.column

@@ -1,4 +1,5 @@
 " vim: set noexpandtab tabstop=4 shiftwidth=4:
+scriptencoding utf-8
 function! yavimim#util#show_message(...)
 	let yavimim#util#yavimim_verbose =
 				\ exists('g:yavimim_verbose') ? g:yavimim_verbose : 1
