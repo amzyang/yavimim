@@ -59,9 +59,18 @@ function! s:init()
 	let s:yavimim = {}
 	runtime autoload/yavimim/user_config.vim
 	call s:setup_backend()
-	autocmd YaVimIM CursorMovedI * call g:yavimim_cursor_movedi()
-	autocmd YaVimIM InsertEnter * call g:yavimim_start_insert()
-	autocmd YaVimIM InsertLeave * call g:do_after_cancel()
+	autocmd YaVimIM CursorMovedI *
+				\ if exists('b:yavimim')
+				\ | call g:yavimim_cursor_movedi()
+				\ | endif
+	autocmd YaVimIM InsertEnter *
+				\ if exists('b:yavimim')
+				\ | call g:yavimim_start_insert()
+				\ | endif
+	autocmd YaVimIM InsertLeave *
+				\ if exists('b:yavimim')
+				\ | call g:do_after_cancel()
+				\ | endif
 	autocmd YaVimIM BufWinEnter *
 				\ if !exists('b:vimim') && &l:modifiable
 				\ | let &l:iminsert = 0
@@ -104,6 +113,7 @@ function! s:init_buffer()
 	let b:yavimim.match_lists = []
 	let b:yavimim.state = 0
 	let b:yavimim.pmenu = 0
+	let b:yavimim.base = ''
 	call s:set_cursor_position()
 
 	" binding all keys
@@ -154,6 +164,7 @@ function! s:toggle_options()
 		let b:yavimim.omnifunc_saved = &l:omnifunc
 		let b:yavimim.completeopt_saved = &completeopt
 		let b:yavimim.pumheight_saved = &pumheight
+		let b:yavimim.iminsert_saved = &l:iminsert
 		let &l:omnifunc='g:yavimim_omnifunc'
 		let &completeopt='menuone'
 		let &pumheight = 10

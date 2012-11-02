@@ -1,9 +1,12 @@
 " vim: set noexpandtab tabstop=4 shiftwidth=4:
 scriptencoding utf-8
 function! yavimim#highlight#predict()
-	let line = line('.')
-	let start = b:yavimim.cursor.column
-	let pattern = printf("\\%%%sl\\%%>%dc.*\\%%<%dc", line, start, col('.'))
+	return yavimim#highlight#highlight(line('.'),
+				\ b:yavimim.cursor.column, col('.'))
+endfunction
+
+function! yavimim#highlight#highlight(lnum, start, end)
+	let pattern = printf("\\%%%sl\\%%>%dc.*\\%%<%dc", a:lnum, a:start, a:end)
 	if exists('b:yavimim.highlight_id')
 		call matchdelete(b:yavimim.highlight_id)
 	endif
