@@ -233,7 +233,9 @@ endfunction
 
 function! g:lmap_bs()
 	let key = '\<BackSpace>'
-	if b:yavimim.cursor.column < col('.') - 2
+	let step = (col('.') - 1 - b:yavimim.cursor.column)
+	" 因为此时还没开始做退格操作，在删之后是4个就要做自动补全，所以在删之前是5个
+	if step <= 5
 		let key .= '\<C-X>\<C-O>\<C-R>=g:do_trigger_completion()\<CR>'
 	endif
 	silent execute printf('silent return "%s"', key)
