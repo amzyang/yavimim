@@ -166,7 +166,6 @@ function! g:do_waiting_commit()
 	" 开始中文输入中
 	let b:yavimim.state = 1
 	call yavimim#highlight#predict()
-	" call s:debug(b:yavimim.cursor)
 	return ''
 endfunction
 
@@ -372,7 +371,7 @@ function! g:yavimim_omnifunc(findstart, base)
 	if a:findstart
 		call s:fix_cursor_position()
 		let base = getline(b:yavimim.cursor.line)
-					\[b:yavimim.cursor.column:col('.') - 1]
+					\[b:yavimim.cursor.column:col('.') - 2]
 		let b:yavimim.match_lists = s:get_match_lists(base)
 		if !len(b:yavimim.match_lists)
 			return -3
