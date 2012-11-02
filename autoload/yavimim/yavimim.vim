@@ -425,6 +425,16 @@ function! s:get_match_lists(key)
 		return []
 	else
 		let l:line = s:yavimim.im.lines[l:index]
+		try
+			if &enc != 'utf-8'
+				let l:line = iconv(l:line, 'utf-8', &enc)
+				" 移除编码转换失败词组
+				let pattern = '?\+\l*'
+				let l:line = substitute(l:line, pattern, '', 'g')
+			endif
+		catch /.*/
+			echoerr Maybe iconv feature is missing. see http://www.vim.org/download.php for more details.
+		endtry
 		let l:parts = split(l:line, '\s\+')
 		call remove(l:parts, 0)
 		return l:parts
