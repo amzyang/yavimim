@@ -143,8 +143,6 @@ function! s:init_buffer()
 	" 只在补全可见时禁用，其它时候可用
 	silent execute printf("lnoremap %s %s <Nop>", s:y.map_args, "<Home>")
 	silent execute printf("lnoremap %s %s <Nop>", s:y.map_args, "<End>")
-	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<ESC>",
-				\ "<C-R>=g:do_after_cancel()<CR><ESC>")
 	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<C-E>",
 				\ "<C-R>=g:lmap_ctrl_e()<CR>")
 	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<Up>",
