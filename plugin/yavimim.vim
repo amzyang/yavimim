@@ -6,16 +6,16 @@ endif
 
 let g:yavimim = {}
 
-noremap <silent> <unique>  :call yavimim#yavimim#toggle('normal')<CR>
-inoremap <silent> <unique> <expr>  yavimim#yavimim#toggle()
-lnoremap <silent> <unique> <expr>  yavimim#yavimim#toggle()
-cnoremap <silent> <unique> <expr>  yavimim#yavimim#toggle()
+noremap <silent> <unique>  :call yavimim#toggle('normal')<CR>
+inoremap <silent> <unique> <expr>  yavimim#toggle()
+lnoremap <silent> <unique> <expr>  yavimim#toggle()
+cnoremap <silent> <unique> <expr>  yavimim#toggle()
 
 " usage
 " YDebug b:yavimim,g:yavimim
 " YDebugEval b:yavimim,s:
 " @TODO: 添加自定义补全，把 yavimim 中的脚本域的变量名和函数名全部加上
-command -nargs=* -complete=var YDebug cal yavimim#yavimim#debug(<f-args>)
+command -nargs=* -complete=var YDebug cal yavimim#debug(<f-args>)
 augroup YaVimIM
 	autocmd VimEnter *
 				\ if exists('g:Powerline_loaded') && g:Powerline_loaded
