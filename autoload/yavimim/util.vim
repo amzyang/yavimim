@@ -1,4 +1,4 @@
-" vim: set noexpandtab tabstop=4 shiftwidth=4:
+" vim: set noexpandtab nolist tabstop=4 shiftwidth=4:
 scriptencoding utf-8
 function! yavimim#util#show_message(...)
 	let yavimim#util#yavimim_verbose =
