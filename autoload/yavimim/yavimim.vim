@@ -59,22 +59,6 @@ function! s:init()
 	let s:yavimim = {}
 	runtime autoload/yavimim/user_config.vim
 	call s:setup_backend()
-	autocmd YaVimIM CursorMovedI *
-				\ if exists('b:yavimim')
-				\ | call g:yavimim_cursor_movedi()
-				\ | endif
-	autocmd YaVimIM InsertEnter *
-				\ if exists('b:yavimim')
-				\ | call g:yavimim_start_insert()
-				\ | endif
-	autocmd YaVimIM InsertLeave *
-				\ if exists('b:yavimim')
-				\ | call g:do_after_cancel()
-				\ | endif
-	autocmd YaVimIM BufWinEnter *
-				\ if !exists('b:vimim') && &l:modifiable
-				\ | let &l:iminsert = 0
-				\ | endif
 endfunction
 
 function! g:yavimim_cursor_movedi()
@@ -114,6 +98,22 @@ function! s:init_buffer()
 	let b:yavimim.state = 0
 	let b:yavimim.pmenu = 0
 	let b:yavimim.base = ''
+	autocmd YaVimIM CursorMovedI <buffer>
+				\ if exists('b:yavimim')
+				\ | call g:yavimim_cursor_movedi()
+				\ | endif
+	autocmd YaVimIM InsertEnter <buffer>
+				\ if exists('b:yavimim')
+				\ | call g:yavimim_start_insert()
+				\ | endif
+	autocmd YaVimIM InsertLeave <buffer>
+				\ if exists('b:yavimim')
+				\ | call g:do_after_cancel()
+				\ | endif
+	autocmd YaVimIM BufWinEnter <buffer>
+				\ if !exists('b:vimim') && &l:modifiable
+				\ | let &l:iminsert = 0
+				\ | endif
 	call s:set_cursor_position()
 
 	" binding all keys
