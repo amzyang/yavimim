@@ -1,5 +1,8 @@
 " vim: set noexpandtab nolist tabstop=4 shiftwidth=4:
 scriptencoding utf-8
+
+let yavimim#util#cycle_langmap = 30 " keycode , :help i_CTRL-^
+
 function! yavimim#util#show_message(...)
 	let yavimim#util#yavimim_verbose =
 				\ exists('g:yavimim_verbose') ? g:yavimim_verbose : 1
@@ -48,4 +51,8 @@ function! yavimim#util#powerline_hook()
         let g:Powerline#Colorschemes#{g:Powerline_colorscheme}#colorscheme[key]
                     \ = l:colorschemes[key]
     endfor
+endfunction
+
+function! yavimim#util#getmode()
+	return mode(1)
 endfunction

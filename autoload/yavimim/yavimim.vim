@@ -24,6 +24,7 @@ function! yavimim#yavimim#toggle(...)
 	if !&l:modifiable | return '' | endif
 	if !exists('g:yavimim.init') | call s:init() | endif
 	if !exists('b:yavimim') | call s:init_buffer() | endif
+	call yavimim#cmdline#init()
 	call s:toggle_options()
 	if exists('b:yavimim.highlight_id')
 		call matchdelete(b:yavimim.highlight_id)
@@ -312,15 +313,12 @@ function! s:lmap_letters()
 endfunction
 
 function! g:lmap_letter(char)
-	if s:yavimim.im.type == 'wubi'
-		return s:lmap_letter_wubi(a:char)
-	elseif 1 " @TODO
-		:
-	else
-	endif
+	let type = s:yavimim.im.type
+	let mode = yavimim#util#getmode()
+	return s:lmap_letter_{type}_{mode}(a:char)
 endfunction
 
-function! s:lmap_letter_wubi(char)
+function! s:lmap_letter_wubi_i(char)
 	" 五笔
 	" 检测我们是否已经输入四个可用字母，此时就可以上档了
 	call s:fix_cursor_position()
@@ -332,6 +330,10 @@ function! s:lmap_letter_wubi(char)
 	let key .= a:char . '\<C-R>=g:do_waiting_commit()\<CR>' .
 				\ '\<C-X>\<C-O>\<C-R>=g:do_trigger_completion()\<CR>'
 	silent execute printf('return "%s"', key)
+endfunction
+
+function! s:lmap_letter_wubi_c(char)
+	return yavimim#cmdline#wubi(a:char)
 endfunction
 
 function! g:lmap_space()
@@ -382,7 +384,8 @@ function! g:yavimim_omnifunc(findstart, base)
 		let base = getline(b:yavimim.cursor.line)
 					\[b:yavimim.cursor.column:col('.') - 2]
 		let b:yavimim.base = base
-		let b:yavimim.match_lists = s:get_match_lists(base)
+		let b:yavimim.match_lists =
+					\ yavimim#backend#get_match_lists(s:yavimim.im, base)
 		if !len(b:yavimim.match_lists)
 			return -3
 		endif
@@ -391,7 +394,7 @@ function! g:yavimim_omnifunc(findstart, base)
 		let l:matches = []
 		let l:index = 1
 		for l:match in b:yavimim.match_lists
-			let [l:word, l:menu] = s:wubi_qq_spliter(l:match)
+			let [l:word, l:menu] = yavimim#backend#wubi_qq_spliter(l:match)
 			let l:abbr=printf(printf("%%%dd %%s",
 						\ len(len(b:yavimim.match_lists))),
 						\ l:index==10 ? 0 : l:index, l:match)
@@ -400,83 +403,6 @@ function! g:yavimim_omnifunc(findstart, base)
 		endfor
 		return {'words': l:matches}
 	endif
-endfunction
-
-function! s:wubi_qq_spliter(string)
-	" '你好vb' => ['你好', 'vb']
-	let l:first = ''
-	let l:second = ''
-	let l:start = -1
-	let l:index = 0
-	while l:index < len(a:string)
-		let l:char = a:string[l:index]
-		if l:char =~ '[a-z]'
-			let l:second .= l:char
-		else
-			let l:first .= l:char
-		endif
-		let l:index += 1
-	endwhile
-	return [l:first, l:second]
-endfunction
-
-function! s:get_match_lists(key)
-	if empty(s:yavimim.im.lines) && s:yavimim.im.type != 'cloud'
-		" @TODO: can we access l:path?
-		let l:path = s:yavimim.im.path
-		let l:lines = readfile(l:path)
-		let s:yavimim.im.lines = l:lines
-	endif
-	let l:index = s:find_sorted_idx(s:yavimim.im.lines, a:key)
-	if l:index == -1
-		return []
-	else
-		let l:line = s:yavimim.im.lines[l:index]
-		try
-			if &enc != 'utf-8'
-				let l:line = iconv(l:line, 'utf-8', &enc)
-				" 移除编码转换失败词组
-				let pattern = '?\+\l*'
-				let l:line = substitute(l:line, pattern, '', 'g')
-			endif
-		catch /.*/
-			echoerr "Maybe iconv feature is missing.
-						\ See http://www.vim.org/download.php for more details."
-		endtry
-		let l:parts = split(l:line, '\s\+')
-		call remove(l:parts, 0)
-		return l:parts
-	endif
-endfunction
-
-function! s:find_sorted_idx(list, key)
-	" a:list: ['a', 'aa', 'ab', ...]
-	" a:key:   'def'
-	let l:pattern = '^' . a:key . '\s\+'
-
-	let low = 0
-	let high = len(a:list)
-	let mid = (low + high) / 2
-	let pattern = '^' . a:key . '\s\+'
-	let l:key = remove(split(a:list[mid], '\s\+'), 0)
-
-	while low <= high && l:key != a:key
-		if l:key < a:key
-			let low = mid + 1
-		elseif l:key > a:key
-			let high = mid - 1
-		endif
-		let mid = (low + high) / 2
-		if mid >= len(a:list)
-			break
-		endif
-		let l:key = remove(split(a:list[mid], '\s\+'), 0)
-	endwhile
-
-	if l:key == a:key
-		return mid
-	endif
-	return -1
 endfunction
 " ==============================================================================
 " utils

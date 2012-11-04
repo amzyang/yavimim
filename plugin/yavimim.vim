@@ -9,6 +9,7 @@ let g:yavimim = {}
 noremap <silent> <unique>  :call yavimim#yavimim#toggle('normal')<CR>
 inoremap <silent> <unique> <expr>  yavimim#yavimim#toggle()
 lnoremap <silent> <unique> <expr>  yavimim#yavimim#toggle()
+cnoremap <silent> <unique> <expr>  yavimim#yavimim#toggle()
 
 " usage
 " YDebug b:yavimim,g:yavimim
