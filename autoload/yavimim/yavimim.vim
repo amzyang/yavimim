@@ -120,37 +120,20 @@ function! s:init_buffer()
 	call s:lmap_letters()
 	call s:lmap_numbers()
 	call s:lmap_punctuations()
-	silent execute
-				\ printf("lnoremap %s %s %s",
-				\ s:y.map_args,
-				\ '<CR>',
-				\ "<C-R>=g:lmap_enter()<CR>")
-	silent execute
-				\ printf("lnoremap %s %s %s",
-				\ s:y.map_args,
-				\ '<Space>',
-				\ '<C-R>=g:lmap_space()<CR>')
-	silent execute
-				\ printf("lnoremap %s %s %s",
-				\ s:y.map_args,
-				\ "<BS>",
-				\ "<C-R>=g:lmap_bs()<CR>")
-	silent execute
-				\ printf("lnoremap %s %s %s",
-				\ s:y.map_args,
-				\ "<C-H>",
-				\ "<C-R>=g:lmap_bs()<CR>")
+	silent execute "lnoremap" s:y.map_args "<CR>" "<C-R>=g:lmap_enter()<CR>"
+	silent execute "lnoremap" s:y.map_args "<Space>" "<C-R>=g:lmap_space()<CR>"
+	silent execute "lnoremap" s:y.map_args "<BS>" "<C-R>=g:lmap_bs()<CR>"
+	silent execute "lnoremap" s:y.map_args "<C-H>" "<C-R>=g:lmap_bs()<CR>"
 	" 只在补全可见时禁用，其它时候可用
-	silent execute printf("lnoremap %s %s <Nop>", s:y.map_args, "<Home>")
-	silent execute printf("lnoremap %s %s <Nop>", s:y.map_args, "<End>")
-	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<C-E>",
-				\ "<C-R>=g:lmap_ctrl_e()<CR>")
-	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<Up>",
-				\ "<C-R>=g:change_cursor_pmenu_position(-1)<CR><Up>")
-	silent execute printf("lnoremap %s %s %s", s:y.map_args, "<Down>",
-				\ "<C-R>=g:change_cursor_pmenu_position(1)<CR><Down>")
-	" silent execute printf("lnoremap %s %s %s", s:y.map_args, "<C-U>",
-				" \ "<C-R>=g:do_after_cancel()<CR><C-U>")
+	silent execute "lnoremap" s:y.map_args "<Home> <Nop>"
+	silent execute "lnoremap" s:y.map_args "<End> <Nop>"
+	silent execute "lnoremap" s:y.map_args "<C-E>" "<C-R>=g:lmap_ctrl_e()<CR>"
+	silent execute "lnoremap" s:y.map_args "<Up>"
+				\ "<C-R>=g:change_cursor_pmenu_position(-1)<CR><Up>"
+	silent execute "lnoremap" s:y.map_args "<Down>"
+				\ "<C-R>=g:change_cursor_pmenu_position(1)<CR><Down>"
+	" silent execute "lnoremap" s:y.map_args "<C-U>"
+				" \ "<C-R>=g:do_after_cancel()<CR><C-U>"
 endfunction
 
 function! s:toggle_options()
@@ -234,11 +217,8 @@ function! s:lmap_punctuations()
 	while index < len(origins)
 		let origin = origins[index]
 		let tran = trans[index]
-		silent execute
-					\ printf("lnoremap %s %s %s",
-					\ s:y.map_args,
-					\ origin,
-					\ "<C-R>=g:lmap_punctuation(".index.")<CR>")
+		silent execute "lnoremap" s:y.map_args origin
+					\ "<C-R>=g:lmap_punctuation(".index.")<CR>"
 		let index += 1
 	endwhile
 endfunction
@@ -261,7 +241,7 @@ function! g:lmap_bs()
 	if step <= 5
 		let key .= '\<C-X>\<C-O>\<C-R>=g:do_trigger_completion()\<CR>'
 	endif
-	silent execute printf('silent return "%s"', key)
+	silent execute printf('return "%s"', key)
 endfunction
 
 function! g:lmap_ctrl_e()
@@ -304,11 +284,8 @@ endf
 
 function! s:lmap_numbers()
 	for l:number in range(10)
-		silent execute
-					\ printf("lnoremap %s %s %s",
-					\ s:y.map_args,
-					\ l:number,
-					\ "<C-R>=g:lmap_number(" . l:number . ")<CR>")
+		silent execute "lnoremap" s:y.map_args l:number
+					\ "<C-R>=g:lmap_number(".l:number.")<CR>"
 	endfor
 endfunction
 
@@ -320,7 +297,7 @@ function! g:lmap_number(number)
 	endif
 	if b:yavimim.state == 1
 		let l:key = repeat('\<Down>', l:number) . '\<C-Y>'
-		silent execute printf('silent return "%s%s"', l:key,
+		silent execute printf('return "%s%s"', l:key,
 					\ '\<C-R>=g:do_after_commit()\<CR>')
 	else
 		return l:number
