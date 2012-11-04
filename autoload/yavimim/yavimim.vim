@@ -463,7 +463,8 @@ function! s:get_match_lists(key)
 				let l:line = substitute(l:line, pattern, '', 'g')
 			endif
 		catch /.*/
-			echoerr Maybe iconv feature is missing. see http://www.vim.org/download.php for more details.
+			echoerr "Maybe iconv feature is missing.
+						\ See http://www.vim.org/download.php for more details."
 		endtry
 		let l:parts = split(l:line, '\s\+')
 		call remove(l:parts, 0)
