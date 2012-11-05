@@ -3,45 +3,29 @@ scriptencoding utf-8
 " ==============================================================================
 " initialization
 " ==============================================================================
-let s:y = {}
-let s:y.cycle_langmap = 30 " keycode , :help i_CTRL-^
+let s:map_args= "<silent> <buffer> <unique>"
 
-let s:y.keycodes = {}
-let s:y.keycodes.enter = 13 " Enter/CR
-let s:y.keycodes.ctrl_e = 5 " Ctrl-E
-let s:y.keycodes.ctrl_y = 25 " Ctrl-Y
-let s:y.keycodes.ctrl_n = 14 " Ctrl-N
-let s:y.keycodes.space = 32 " Space
-let s:y.keycodes.escape = 27 " Esc
-let s:y.map_args= "<silent> <buffer> <unique>"
-
-let s:y.punctuation = {
+let s:punctuation = {
 			\ 'origin': [',', '.', ';', '?', '!', '\', ':'],
 			\ 'trans': ['，', '。', '；', '？', '！', '、', '：']}
 
-function! yavimim#yavimim#toggle(...)
+function! yavimim#insert#toggle(...)
 	call s:plugin_compatible()
 	if !&l:modifiable | return '' | endif
-	if !exists('g:yavimim.init') | call s:init() | endif
 	if !exists('b:yavimim') | call s:init_buffer() | endif
-	call yavimim#cmdline#init()
 	call s:toggle_options()
 	if exists('b:yavimim.highlight_id')
 		call matchdelete(b:yavimim.highlight_id)
 		unlet b:yavimim.highlight_id
 	endif
 	call s:set_cursor_position()
-	if a:0 > 0
-		" invoke from normal mode
-		if &l:iminsert == 1 && exists('b:yavimim.iminsert_saved')
-			let &l:iminsert = b:yavimim.iminsert_saved
-		else
-			let b:yavimim.iminsert_saved = &l:iminsert
-			let &l:iminsert = 1
-		endif
+	if &l:iminsert != 1
+		call s:mappings()
 	else
-		return nr2char(s:y.cycle_langmap)
+		lmapclear <buffer>
+		lmapclear
 	endif
+	return nr2char(yavimim#util#keycode('langmap'))
 endfunction
 
 function! s:plugin_compatible()
@@ -55,15 +39,8 @@ function! s:set_cursor_position()
 	let b:yavimim.cursor = {'line': line('.'), 'column': col('.') - 1}
 endfunction
 
-function! s:init()
-	let g:yavimim.init = 1
-	let s:yavimim = {}
-	runtime autoload/yavimim/user_config.vim
-	call s:setup_backend()
-endfunction
-
-function! g:yavimim_cursor_movedi()
-	if !exists('b:yavimim') || &l:iminsert != 1
+function! s:yavimim_cursor_movedi()
+	if &l:iminsert != 1
 		return
 	endif
 
@@ -72,12 +49,14 @@ function! g:yavimim_cursor_movedi()
 	endif
 endfunction
 
-function! g:yavimim_start_insert()
-	if !exists('b:yavimim') || &l:iminsert != 1
-		return
-	endif
-
+function! s:yavimim_start_insert()
 	call s:reset_start_insert()
+	let b:yavimim.tmp = &l:iminsert
+	let &l:iminsert = b:yavimim.iminsert_saved
+	let b:yavimim.iminsert_saved = b:yavimim.tmp
+	if &l:iminsert == 1
+		call s:mappings()
+	endif
 endfunction
 
 function! s:reset_start_insert()
@@ -99,42 +78,17 @@ function! s:init_buffer()
 	let b:yavimim.state = 0
 	let b:yavimim.pmenu = 0
 	let b:yavimim.base = ''
-	autocmd YaVimIM CursorMovedI <buffer>
-				\ if exists('b:yavimim')
-				\ | call g:yavimim_cursor_movedi()
-				\ | endif
-	autocmd YaVimIM InsertEnter <buffer>
-				\ if exists('b:yavimim')
-				\ | call g:yavimim_start_insert()
-				\ | endif
+	autocmd YaVimIM CursorMovedI <buffer> call s:yavimim_cursor_movedi()
+	autocmd YaVimIM InsertEnter <buffer> call s:yavimim_start_insert()
 	autocmd YaVimIM InsertLeave <buffer>
-				\ if exists('b:yavimim')
-				\ | call g:do_after_cancel()
-				\ | endif
+				\ call g:do_after_cancel()
+				\ | let b:yavimim.tmp = &l:iminsert
+				\ | let &l:iminsert = b:yavimim.iminsert_saved
+				\ | let b:yavimim.iminsert_saved = b:yavimim.tmp
 	autocmd YaVimIM BufWinEnter <buffer>
 				\ if !exists('b:vimim') && &l:modifiable
 				\ | let &l:iminsert = 0
 				\ | endif
-	call s:set_cursor_position()
-
-	" binding all keys
-	call s:lmap_letters()
-	call s:lmap_numbers()
-	call s:lmap_punctuations()
-	silent execute "lnoremap" s:y.map_args "<CR>" "<C-R>=g:lmap_enter()<CR>"
-	silent execute "lnoremap" s:y.map_args "<Space>" "<C-R>=g:lmap_space()<CR>"
-	silent execute "lnoremap" s:y.map_args "<BS>" "<C-R>=g:lmap_bs()<CR>"
-	silent execute "lnoremap" s:y.map_args "<C-H>" "<C-R>=g:lmap_bs()<CR>"
-	" 只在补全可见时禁用，其它时候可用
-	silent execute "lnoremap" s:y.map_args "<Home> <Nop>"
-	silent execute "lnoremap" s:y.map_args "<End> <Nop>"
-	silent execute "lnoremap" s:y.map_args "<C-E>" "<C-R>=g:lmap_ctrl_e()<CR>"
-	silent execute "lnoremap" s:y.map_args "<Up>"
-				\ "<C-R>=g:change_cursor_pmenu_position(-1)<CR><Up>"
-	silent execute "lnoremap" s:y.map_args "<Down>"
-				\ "<C-R>=g:change_cursor_pmenu_position(1)<CR><Down>"
-	" silent execute "lnoremap" s:y.map_args "<C-U>"
-				" \ "<C-R>=g:do_after_cancel()<CR><C-U>"
 endfunction
 
 function! s:toggle_options()
@@ -192,40 +146,71 @@ function! g:set_after_insert_beside_chinese()
 	return ''
 endfunction
 
-function! s:setup_backend()
-	let l:wubi_qqs = split(globpath(&rtp, 'autoload/yavimim/wubi/qq.txt'), '\n')
-	if len(l:wubi_qqs) > 0
-		silent call yavimim#util#show_message()
+function! g:do_trigger_completion()
+	if pumvisible() && len(b:yavimim.match_lists) == 1
+		silent execute printf('return "%s"',
+					\ '\<C-Y>\<C-R>=g:do_after_commit()\<CR>')
 	endif
-	let s:yavimim.backends = {
-				\ 'wubi_qq': {'path': l:wubi_qqs[0],
-					\ 'type': 'wubi',
-					\ 'keys': [],
-					\ 'lines':[],
-					\ 'name': 'QQ云五笔'}
-				\ }
-	let s:yavimim.metadatas = {'wubi': {'full': '五笔', 'short': '五'},
-				\ 'pinyin': {'full': '拼音', 'short': '拼'}}
-	let s:yavimim.im = s:yavimim.backends.wubi_qq
+	if pumvisible()
+		silent execute printf('return "%s"', '\<C-P>')
+	endif
+	return ''
 endfunction
 " ==============================================================================
 " key mappings
 " ==============================================================================
+function! s:mappings()
+	" binding all keys
+	lmapclear
+	lmapclear <buffer>
+	silent execute "lnoremap" s:map_args "<CR>" "<C-R>=yavimim#insert#enter()<CR>"
+	silent execute "lnoremap" s:map_args "<Space>" "<C-R>=yavimim#insert#space()<CR>"
+	silent execute "lnoremap" s:map_args "<BS>" "<C-R>=yavimim#insert#backspace()<CR>"
+	silent execute "lnoremap" s:map_args "<C-H>" "<C-R>=yavimim#insert#backspace()<CR>"
+	" 只在补全可见时禁用，其它时候可用
+	silent execute "lnoremap" s:map_args "<Home> <Nop>"
+	silent execute "lnoremap" s:map_args "<End> <Nop>"
+	silent execute "lnoremap" s:map_args "<C-E>" "<C-R>=yavimim#insert#ctrl_e()<CR>"
+	silent execute "lnoremap" s:map_args "<Up>"
+				\ "<C-R>=g:change_cursor_pmenu_position(-1)<CR><Up>"
+	silent execute "lnoremap" s:map_args "<Down>"
+				\ "<C-R>=g:change_cursor_pmenu_position(1)<CR><Down>"
+	" silent execute "lnoremap" s:map_args "<C-U>"
+				" \ "<C-R>=g:do_after_cancel()<CR><C-U>"
+	call s:lmap_punctuations()
+	call s:lmap_numbers()
+	call s:lmap_letters()
+endfunction
+
 function! s:lmap_punctuations()
 	let index = 0
-	let origins = s:y.punctuation.origin
-	let trans = s:y.punctuation.trans
+	let origins = s:punctuation.origin
+	let trans = s:punctuation.trans
 	while index < len(origins)
 		let origin = origins[index]
 		let tran = trans[index]
-		silent execute "lnoremap" s:y.map_args origin
-					\ "<C-R>=g:lmap_punctuation(".index.")<CR>"
+		silent execute "lnoremap" s:map_args origin
+					\ "<C-R>=yavimim#insert#punctuation(".index.")<CR>"
 		let index += 1
 	endwhile
 endfunction
 
-function! g:lmap_punctuation(index)
-	let tran = s:y.punctuation.trans[a:index]
+function! s:lmap_numbers()
+	for l:number in range(10)
+		silent execute "lnoremap" s:map_args l:number
+					\ "<C-R>=yavimim#insert#number(".l:number.")<CR>"
+	endfor
+endfunction
+
+function! s:lmap_letters()
+	for l:letter in range(char2nr('a'), char2nr('z'))
+		silent execute printf("lnoremap %s %s <C-R>=yavimim#insert#letter('%s')<CR>",
+					\ s:map_args, nr2char(l:letter), nr2char(l:letter))
+	endfor
+endfunction
+
+function! yavimim#insert#punctuation(index)
+	let tran = s:punctuation.trans[a:index]
 	if pumvisible()
 		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
 		let key .= tran
@@ -235,7 +220,7 @@ function! g:lmap_punctuation(index)
 	silent execute printf('return "%s"', key)
 endfunction
 
-function! g:lmap_bs()
+function! yavimim#insert#backspace()
 	let key = '\<BackSpace>'
 	let step = (col('.') - 1 - b:yavimim.cursor.column)
 	" 因为此时还没开始做退格操作，在删之后是4个就要做自动补全，所以在删之前是5个
@@ -245,7 +230,7 @@ function! g:lmap_bs()
 	silent execute printf('return "%s"', key)
 endfunction
 
-function! g:lmap_ctrl_e()
+function! yavimim#insert#ctrl_e()
 	if b:yavimim.state == 1
 		let key = '\<C-R>=g:do_after_cancel()\<CR>'
 		if pumvisible()
@@ -259,19 +244,7 @@ function! g:lmap_ctrl_e()
 	silent execute printf('return "%s"', key)
 endfunction
 
-function! g:do_trigger_completion()
-	if pumvisible() && len(b:yavimim.match_lists) == 1
-		silent execute printf('return "%s"',
-					\ '\<C-Y>\<C-R>=g:do_after_commit()\<CR>')
-	endif
-	if pumvisible()
-		silent execute printf('return "%s"', '\<C-P>')
-	endif
-	return ''
-endfunction
-
-" binding enter
-function! g:lmap_enter()
+function! yavimim#insert#enter()
 	if pumvisible()
 		let key = '\<C-Y>'
 	elseif b:yavimim.state == 1
@@ -283,15 +256,7 @@ function! g:lmap_enter()
 	silent execute printf('return "%s"', key)
 endf
 
-function! s:lmap_numbers()
-	for l:number in range(10)
-		silent execute "lnoremap" s:y.map_args l:number
-					\ "<C-R>=g:lmap_number(".l:number.")<CR>"
-	endfor
-endfunction
-
-" binding number
-function! g:lmap_number(number)
+function! yavimim#insert#number(number)
 	let l:number = a:number
 	if l:number == 0 && b:yavimim.state == 1
 		let l:number = 10
@@ -305,20 +270,12 @@ function! g:lmap_number(number)
 	endif
 endfunction
 
-function! s:lmap_letters()
-	for l:letter in range(char2nr('a'), char2nr('z'))
-		silent execute printf("lnoremap %s %s <C-R>=g:lmap_letter('%s')<CR>",
-					\ s:y.map_args, nr2char(l:letter), nr2char(l:letter))
-	endfor
+function! yavimim#insert#letter(char)
+	let im = yavimim#getim()
+	return s:lmap_letter_{im.type}(a:char)
 endfunction
 
-function! g:lmap_letter(char)
-	let type = s:yavimim.im.type
-	let mode = yavimim#util#getmode()
-	return s:lmap_letter_{type}_{mode}(a:char)
-endfunction
-
-function! s:lmap_letter_wubi_i(char)
+function! s:lmap_letter_wubi(char)
 	" 五笔
 	" 检测我们是否已经输入四个可用字母，此时就可以上档了
 	call s:fix_cursor_position()
@@ -332,11 +289,7 @@ function! s:lmap_letter_wubi_i(char)
 	silent execute printf('return "%s"', key)
 endfunction
 
-function! s:lmap_letter_wubi_c(char)
-	return yavimim#cmdline#wubi(a:char)
-endfunction
-
-function! g:lmap_space()
+function! yavimim#insert#space()
 	if pumvisible()
 		" 检查 popup menu 是否高亮被选中
 		" :help popupmenu-completion
@@ -385,7 +338,7 @@ function! g:yavimim_omnifunc(findstart, base)
 					\[b:yavimim.cursor.column:col('.') - 2]
 		let b:yavimim.base = base
 		let b:yavimim.match_lists =
-					\ yavimim#backend#get_match_lists(s:yavimim.im, base)
+					\ yavimim#backend#get_match_lists(yavimim#getim(), base)
 		if !len(b:yavimim.match_lists)
 			return -3
 		endif
@@ -411,7 +364,7 @@ function! s:debug(...)
 	call yavimim#util#debugprint(a:000)
 endfunction
 
-function! yavimim#yavimim#debug(...)
+function! yavimim#insert#debug(...)
 	" put here that you can look into script internally variables
 	let l:list = []
 	for l:var in a:000

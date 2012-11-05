@@ -1,8 +1,6 @@
 " vim: set noexpandtab nolist tabstop=4 shiftwidth=4:
 scriptencoding utf-8
 
-let yavimim#util#cycle_langmap = 30 " keycode , :help i_CTRL-^
-
 function! yavimim#util#show_message(...)
 	let yavimim#util#yavimim_verbose =
 				\ exists('g:yavimim_verbose') ? g:yavimim_verbose : 1
@@ -53,6 +51,22 @@ function! yavimim#util#powerline_hook()
     endfor
 endfunction
 
+function! yavimim#util#powerline_inject()
+	command -nargs=0 YaVimIMPowerline call s:powerline_inject()
+endfunction
+
+function! s:powerline_inject()
+	PowerlineClearCache
+	PowerlineReloadColorscheme
+endfunction
+
 function! yavimim#util#getmode()
-	return mode(1)
+	return mode(1) == 'i' ? 'insert' : 'cmdline'
+endfunction
+
+function! yavimim#util#keycode(name)
+	let keycodes = {
+				\ 'langmap': 30
+				\ }
+	return get(keycodes, a:name, 0)
 endfunction
