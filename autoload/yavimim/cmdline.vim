@@ -4,12 +4,14 @@ scriptencoding utf-8
 let s:map_args = ''
 let s:cmdline_single_quote = 0
 let s:cmdline_double_quote = 0
+let s:cmdline_square_quote = 0
 
 autocmd YaVimIM CmdwinEnter call s:cmdline_reset()
 
 function! s:cmdline_reset()
 	let s:cmdline_single_quote = 0
 	let s:cmdline_double_quote = 0
+	let s:cmdline_square_quote = 0
 endfunction
 
 function! yavimim#cmdline#toggle()
@@ -103,11 +105,13 @@ function! yavimim#cmdline#letter(char)
 			else
 				return s:do_commit(s:match_lists[0]) . trans
 			endif
-		elseif char == "'" || char == '"'
+		elseif char == "'" || char == '"' || char == ']'
 			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
 			let type = 'single'
 			if char == '"'
 				let type = 'double'
+			elseif char == ']'
+				let type = 'square'
 			endif
 			let trans = yavimim#cmdline#quote(type)
 			if empty(s:match_lists)
@@ -147,8 +151,8 @@ function! s:lmap_punctuations()
 		let index += 1
 	endwhile
 	
-	" double/single quote
-	let quotes = {'single': "'", 'double': '"'}
+	" double/single/square quote
+	let quotes = {'single': "'", 'double': '"', 'square': ']'}
 	for [type, quote] in items(quotes)
 		silent execute "lnoremap" s:map_args quote
 					\ printf("<C-R>=yavimim#cmdline#quote('%s')<CR>", type)

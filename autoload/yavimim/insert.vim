@@ -5,10 +5,6 @@ scriptencoding utf-8
 " ==============================================================================
 let s:map_args= "<silent> <buffer> <unique>"
 
-let s:punctuation = {
-			\ 'origin': [',', '.', ';', '?', '!', '\', ':'],
-			\ 'trans': ['，', '。', '；', '？', '！', '、', '：']}
-
 function! yavimim#insert#toggle(...)
 	call s:plugin_compatible()
 	if !&l:modifiable | return '' | endif
@@ -184,8 +180,8 @@ endfunction
 
 function! s:lmap_punctuations()
 	let index = 0
-	let origins = s:punctuation.origin
-	let trans = s:punctuation.trans
+	let origins = yavimim#punctuation#origin()
+	let trans = yavimim#punctuation#trans()
 	while index < len(origins)
 		let origin = origins[index]
 		let tran = trans[index]
@@ -194,8 +190,8 @@ function! s:lmap_punctuations()
 		let index += 1
 	endwhile
 
-	" single/double quote
-	let quotes = {'single': "'", 'double': '"'}
+	" single/double/square quote
+	let quotes = {'single': "'", 'double': '"', 'square': ']'}
 	for [type, quote] in items(quotes)
 		silent execute printf("lnoremap %s %s %s",
 					\ s:map_args,
@@ -223,7 +219,7 @@ function! s:lmap_letters()
 endfunction
 
 function! yavimim#insert#punctuation(index)
-	let tran = s:punctuation.trans[a:index]
+	let tran = yavimim#punctuation#trans()[a:index]
 	if pumvisible()
 		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
 		let key .= tran

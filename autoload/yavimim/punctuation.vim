@@ -1,12 +1,20 @@
 " vim: set noexpandtab nolist tabstop=4 shiftwidth=4:
 scriptencoding utf-8
 let s:punctuation = {
-			\ 'origin': [',', '.', ';', '?', '!', '\', ':'],
-			\ 'trans': ['，', '。', '；', '？', '！', '、', '：']}
+			\ 'origin': ['.',  '?',  '!',  ',',  '\',  ';',  ':',
+						\'(',  ')',  '[',
+						\'$',  '^',  '*',  '_',  '~',
+						\'<',  '>'],
+			\ 'trans':  ['。', '？', '！', '，', '、', '；', '：',
+						\'（', '）', '·',
+						\'￥', '……', '×',  '——', '～',
+						\'《', '》']
+			\ }
 
 let s:pairs = {
-			\ 'single': ['‘', '’'],
-			\ 'double': ['“', '”']
+			\ 'single': ['‘',  '’'],
+			\ 'double': ['“',  '”'],
+			\ 'square': ['「', '」']
 			\ }
 
 function! yavimim#punctuation#origin()
