@@ -2,6 +2,15 @@
 scriptencoding utf-8
 
 let s:map_args = ''
+let s:cmdline_single_quote = 0
+let s:cmdline_double_quote = 0
+
+autocmd YaVimIM CmdwinEnter call s:cmdline_reset()
+
+function! s:cmdline_reset()
+	let s:cmdline_single_quote = 0
+	let s:cmdline_double_quote = 0
+endfunction
 
 function! yavimim#cmdline#toggle()
 	let s:cmdpos = getcmdpos() - 1
@@ -94,6 +103,18 @@ function! yavimim#cmdline#letter(char)
 			else
 				return s:do_commit(s:match_lists[0]) . trans
 			endif
+		elseif char == "'" || char == '"'
+			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
+			let type = 'single'
+			if char == '"'
+				let type = 'double'
+			endif
+			let trans = yavimim#cmdline#quote(type)
+			if empty(s:match_lists)
+				return s:do_cancel_commit() . trans
+			else
+				return s:do_commit(s:match_lists[0]) . trans
+			endif
 		else
 			return s:do_cancel_commit()
 		endif
@@ -125,7 +146,21 @@ function! s:lmap_punctuations()
 		silent execute "lnoremap" s:map_args o t
 		let index += 1
 	endwhile
+	
+	" double/single quote
+	let quotes = {'single': "'", 'double': '"'}
+	for [type, quote] in items(quotes)
+		silent execute "lnoremap" s:map_args quote
+					\ printf("<C-R>=yavimim#cmdline#quote('%s')<CR>", type)
+	endfor
 endfunction
+
+function! yavimim#cmdline#quote(type)
+	let pairs = yavimim#punctuation#getpairs()
+	silent execute printf("let s:cmdline_%s_quote += 1", a:type)
+	silent execute printf("return pairs.%s[(s:cmdline_%s_quote - 1) %% 2]", a:type, a:type)
+endfunction
+
 
 function! s:echo()
 	let new_cmd = s:get_updated_cmdline()

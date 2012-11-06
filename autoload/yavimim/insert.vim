@@ -193,6 +193,15 @@ function! s:lmap_punctuations()
 					\ "<C-R>=yavimim#insert#punctuation(".index.")<CR>"
 		let index += 1
 	endwhile
+
+	" single/double quote
+	let quotes = {'single': "'", 'double': '"'}
+	for [type, quote] in items(quotes)
+		silent execute printf("lnoremap %s %s %s",
+					\ s:map_args,
+					\ quote,
+					\ printf("<C-R>=yavimim#insert#quote('%s')<CR>", type))
+	endfor
 endfunction
 
 function! s:lmap_numbers()
@@ -203,14 +212,29 @@ function! s:lmap_numbers()
 endfunction
 
 function! s:lmap_letters()
-	for l:letter in range(char2nr('a'), char2nr('z'))
-		silent execute printf("lnoremap %s %s <C-R>=yavimim#insert#letter('%s')<CR>",
-					\ s:map_args, nr2char(l:letter), nr2char(l:letter))
+	for nr in range(char2nr('a'), char2nr('z'))
+		let char = nr2char(nr)
+		silent execute
+					\ printf("lnoremap %s %s %s",
+					\ s:map_args,
+					\ char,
+					\ printf("<C-R>=yavimim#insert#letter('%s')<CR>", char))
 	endfor
 endfunction
 
 function! yavimim#insert#punctuation(index)
 	let tran = s:punctuation.trans[a:index]
+	if pumvisible()
+		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
+		let key .= tran
+	else
+		let key = tran
+	endif
+	silent execute printf('return "%s"', key)
+endfunction
+
+function! yavimim#insert#quote(type)
+	let tran = yavimim#punctuation#quote(a:type)
 	if pumvisible()
 		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
 		let key .= tran

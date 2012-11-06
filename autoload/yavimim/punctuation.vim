@@ -4,6 +4,11 @@ let s:punctuation = {
 			\ 'origin': [',', '.', ';', '?', '!', '\', ':'],
 			\ 'trans': ['，', '。', '；', '？', '！', '、', '：']}
 
+let s:pairs = {
+			\ 'single': ['‘', '’'],
+			\ 'double': ['“', '”']
+			\ }
+
 function! yavimim#punctuation#origin()
 	return s:punctuation.origin
 endfunction
@@ -24,4 +29,18 @@ endfunction
 function! yavimim#punctuation#trans2origin(trans)
 	let index = index(yavimim#punctuation#trans(), a:trans)
 	return yavimim#punctuation#origin()[index]
+endfunction
+
+function! yavimim#punctuation#getpairs()
+	return s:pairs
+endfunction
+
+function! yavimim#punctuation#quote(type)
+	if !exists(printf('b:yavimim.%s_quote_count', a:type))
+		silent execute printf("let b:yavimim.%s_quote_count = 0", a:type)
+	else
+		silent execute printf("let b:yavimim.%s_quote_count += 1", a:type)
+	endif
+	silent execute printf('return s:pairs.%s[b:yavimim.%s_quote_count %% 2]',
+				\ a:type, a:type)
 endfunction
