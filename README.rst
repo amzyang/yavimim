@@ -1,6 +1,8 @@
 yavimim
 =======
 
+.. image:: https://github.com/grassofhust/grassofhust.github.com/raw/master/assets/yavimim.png
+
 yet another vim input method
 
 **现在属于alpha阶段！！！**
