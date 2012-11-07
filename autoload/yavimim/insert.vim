@@ -196,8 +196,31 @@ function! s:mappings()
 	" silent execute "lnoremap" s:map_args "<C-U>"
 				" \ "<C-R>=g:do_after_cancel()<CR><C-U>"
 	call s:lmap_punctuations()
+	silent execute "lnoremap" s:map_args ";;" "<C-R>=yavimim#insert#en()<CR>"
 	call s:lmap_numbers()
 	call s:lmap_letters()
+endfunction
+
+function! yavimim#insert#en_pre()
+	echohl Title
+	return ''
+endfunction
+
+function! yavimim#insert#en_post()
+	echohl None
+	return ''
+endfunction
+
+function! yavimim#insert#en()
+	if pumvisible()
+		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
+	else
+		let key = '\<C-R>=g:do_after_cancel()\<CR>'
+	endif
+	let key .= "\<C-R>=yavimim#insert#en_pre()\<CR>"
+	let key .= "\<C-R>=input('[EN] ')\<CR>"
+	let key .= "\<C-R>=yavimim#insert#en_post()\<CR>"
+	silent execute printf('return "%s"', key)
 endfunction
 
 function! s:lmap_punctuations()

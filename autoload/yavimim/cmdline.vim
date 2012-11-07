@@ -34,6 +34,16 @@ function! s:mappings()
 	lmapclear
 	call s:lmap_letters()
 	call s:lmap_punctuations()
+	lnoremap <unique> <expr> ;; yavimim#cmdline#en() 
+endfunction
+
+function! yavimim#cmdline#en()
+	call inputsave()
+	echohl Title
+	let string = input("[EN] ")
+	echohl None
+	call inputrestore()
+	return string
 endfunction
 
 function! s:lmap_letters()
