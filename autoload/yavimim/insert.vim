@@ -74,6 +74,7 @@ function! s:init_buffer()
 	let b:yavimim.state = 0
 	let b:yavimim.pmenu = 0
 	let b:yavimim.base = ''
+	let b:yavimim.page_nr = 1
 	autocmd YaVimIM CursorMovedI <buffer> call s:yavimim_cursor_movedi()
 	autocmd YaVimIM InsertEnter <buffer> call s:yavimim_start_insert()
 	autocmd YaVimIM InsertLeave <buffer>
@@ -171,6 +172,14 @@ function! s:mappings()
 				\ "<C-R>=g:change_cursor_pmenu_position(-1)<CR><Up>"
 	silent execute "lnoremap" s:map_args "<Down>"
 				\ "<C-R>=g:change_cursor_pmenu_position(1)<CR><Down>"
+	silent execute "lnoremap <expr>" s:map_args "-"
+				\ "pumvisible() ? yavimim#insert#page(-1) . '<C-E><C-X><C-O><C-P>' : '-'"
+	silent execute "lnoremap <expr>" s:map_args "<PageUp>"
+				\ "pumvisible() ? yavimim#insert#page(-1) . '<C-E><C-X><C-O><C-P>' : '<PageUp>'"
+	silent execute "lnoremap <expr>" s:map_args "="
+				\ "pumvisible() ? yavimim#insert#page(1) . '<C-E><C-X><C-O><C-P>' : '='"
+	silent execute "lnoremap <expr>" s:map_args "<PageDown>"
+				\ "pumvisible() ? yavimim#insert#page(1) . '<C-E><C-X><C-O><C-P>' : '<PageDown>'"
 	" silent execute "lnoremap" s:map_args "<C-U>"
 				" \ "<C-R>=g:do_after_cancel()<CR><C-U>"
 	call s:lmap_punctuations()
@@ -298,6 +307,7 @@ endfunction
 function! s:lmap_letter_wubi(char)
 	" 五笔
 	" 检测我们是否已经输入四个可用字母，此时就可以上档了
+	let b:yavimim.page_nr = 1
 	call s:fix_cursor_position()
 	let l:len = col('.') - b:yavimim.cursor.column - 1
 	let key = ''
@@ -366,16 +376,33 @@ function! g:yavimim_omnifunc(findstart, base)
 	else
 		let l:matches = []
 		let l:index = 1
-		for l:match in b:yavimim.match_lists
+		let match_length = len(b:yavimim.match_lists)
+		let total_nr = float2nr(ceil(match_length / yavimim#util#nr2float(&pumheight)))
+		if b:yavimim.page_nr < 1
+			let b:yavimim.page_nr = total_nr
+		elseif b:yavimim.page_nr > total_nr
+			let b:yavimim.page_nr = 1
+		endif
+		let one = (b:yavimim.page_nr - 1) * &pumheight
+		let two = one + &pumheight - 1
+		let final_list = b:yavimim.match_lists[one : two]
+		let max_length = yavimim#util#maxlength(final_list)
+		for l:match in final_list
 			let [l:word, l:menu] = yavimim#backend#wubi_qq_spliter(l:match)
-			let l:abbr=printf(printf("%%%dd %%s",
-						\ len(len(b:yavimim.match_lists))),
-						\ l:index==10 ? 0 : l:index, l:match)
+			let l:abbr = printf("%d %s", l:index % 10, printf(printf("%%-%ds", max_length), l:match))
 			call add(l:matches, {'word': l:word, 'abbr': l:abbr})
 			let l:index += 1
 		endfor
+		if total_nr != 1
+			let l:matches[0].kind = printf("%d/%d", b:yavimim.page_nr, total_nr)
+		endif
 		return {'words': l:matches}
 	endif
+endfunction
+
+function! yavimim#insert#page(incre)
+	let b:yavimim.page_nr += a:incre
+	return ''
 endfunction
 " ==============================================================================
 " utils
