@@ -53,7 +53,11 @@ function! yavimim#cmdline#letter(char)
 	call s:echo()
 	while 1
 		let nr = getchar()
-		let char = nr2char(nr)
+		if type(nr) == type(0)
+			let char = nr2char(nr)
+		else
+			let char = ''
+		endif
 		
 		" lowercase character
 		if char =~ '\l'
@@ -77,7 +81,7 @@ function! yavimim#cmdline#letter(char)
 				return s:do_commit(s:word_return(char - 1))
 			endif
 		" backspace/ctrl-h
-		elseif nr == 8 || nr == 0
+		elseif nr == "\<BS>" || nr == 8
 			if !empty(s:keys)
 				let len = len(s:keys)
 				if len == 1
@@ -91,14 +95,12 @@ function! yavimim#cmdline#letter(char)
 			endif
 			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
 			call s:echo()
-		" space
-		elseif nr == 32
+		elseif nr == "\<Space>"
 			if !empty(s:match_lists)
 				let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
 				return s:do_commit(s:word_return())
 			endif	
-		" enter
-		elseif nr == 13
+		elseif nr == "\<Enter>"
 			return s:do_cancel_commit()
 		" 普通标点
 		elseif yavimim#punctuation#is_in(char)
@@ -124,8 +126,8 @@ function! yavimim#cmdline#letter(char)
 				return s:do_commit(s:word_return()) . trans
 			endif
 		" -=翻页
-		elseif char == "-" || char == "="
-			if char == "-"
+		elseif char == "-" || char == "=" || nr == "\<PageUp>" || nr == "\<PageDown>"
+			if char == "-" || nr == "\<PageUp>"
 				let s:page_nr -= 1
 				if s:page_nr < 1
 					let s:page_nr = float2nr(ceil(len(s:match_lists) / (5 + 0.0)))
