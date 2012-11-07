@@ -195,7 +195,6 @@ endfunction
 
 
 function! s:echo()
-	redraw!
 	let new_cmd = s:get_updated_cmdline()
 	echo new_cmd
 	echohl Title | echon "\n[五]" | echohl None
