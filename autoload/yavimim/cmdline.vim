@@ -17,7 +17,7 @@ endfunction
 function! yavimim#cmdline#toggle()
 	let s:cmdpos = getcmdpos() - 1
 	let s:match_lists = []
-	let s:page_nr = 0
+	let s:page_nr = 1
 	let s:position = 0
 	if &iminsert != 1
 		call s:mappings()
@@ -38,7 +38,7 @@ endfunction
 
 function! s:lmap_letters()
 	for l:letter in range(char2nr('a'), char2nr('z'))
-		silent execute printf("lnoremap %s %s <C-R>=yavimim#cmdline#letter('%s')<CR>",
+		silent execute printf("lnoremap <silent> %s %s <C-R>=yavimim#cmdline#letter('%s')<CR>",
 					\ s:map_args, nr2char(l:letter), nr2char(l:letter))
 	endfor
 endfunction
@@ -59,18 +59,22 @@ function! yavimim#cmdline#letter(char)
 		if char =~ '\l'
 			let s:keys .= char
 			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
+			let s:page_nr = 1
 			if len(s:match_lists) == 1
-					return s:do_commit(s:match_lists[0])
+					return s:do_commit(s:word_return())
 			else
 				call s:echo()
 			endif
 		" digit
 		elseif char =~ '\d'
 			" @TODO: don't overflow
-			if char > len(s:match_lists)
+			if char == 0
+				char == 10
+			endif
+			if (s:page_nr -1) * 5 + char > len(s:match_lists) || char > 5
 			else
 				let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
-				return s:do_commit(s:match_lists[char - 1])
+				return s:do_commit(s:word_return(char - 1))
 			endif
 		" backspace/ctrl-h
 		elseif nr == 8 || nr == 0
@@ -91,7 +95,7 @@ function! yavimim#cmdline#letter(char)
 		elseif nr == 32
 			if !empty(s:match_lists)
 				let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
-				return s:do_commit(s:match_lists[0])
+				return s:do_commit(s:word_return())
 			endif	
 		" enter
 		elseif nr == 13
@@ -103,7 +107,7 @@ function! yavimim#cmdline#letter(char)
 			if empty(s:match_lists)
 				return s:do_cancel_commit() . trans
 			else
-				return s:do_commit(s:match_lists[0]) . trans
+				return s:do_commit(s:word_return()) . trans
 			endif
 		elseif char == "'" || char == '"' || char == ']'
 			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
@@ -117,8 +121,22 @@ function! yavimim#cmdline#letter(char)
 			if empty(s:match_lists)
 				return s:do_cancel_commit() . trans
 			else
-				return s:do_commit(s:match_lists[0]) . trans
+				return s:do_commit(s:word_return()) . trans
 			endif
+		" -=翻页
+		elseif char == "-" || char == "="
+			if char == "-"
+				let s:page_nr -= 1
+				if s:page_nr < 1
+					let s:page_nr = float2nr(ceil(len(s:match_lists) / (5 + 0.0)))
+				endif
+			else
+				let s:page_nr += 1
+				if s:page_nr > float2nr(ceil(len(s:match_lists) / (5 + 0.0)))
+					let s:page_nr = 1
+				endif
+			endif
+			call s:echo()
 		else
 			return s:do_cancel_commit()
 		endif
@@ -126,7 +144,16 @@ function! yavimim#cmdline#letter(char)
 	return ''
 endfunction
 
+function! s:word_return(...)
+	let idx = (s:page_nr - 1) * 5
+	if a:0
+		let idx += a:1
+	endif
+	return s:match_lists[idx]
+endfunction
+
 function! s:do_commit(string)
+	let s:page_nr = 1
 	let s:keys = ''
 	let [first, second] = yavimim#backend#wubi_qq_spliter(a:string)
 	call s:echo()
@@ -134,6 +161,7 @@ function! s:do_commit(string)
 endfunction
 
 function! s:do_cancel_commit()
+	let s:page_nr = 1
 	let key = s:keys
 	let s:keys = ''
 	let s:match_lists = []
@@ -167,16 +195,20 @@ endfunction
 
 
 function! s:echo()
+	redraw!
 	let new_cmd = s:get_updated_cmdline()
 	echo new_cmd
 	echohl Title | echon "\n[五]" | echohl None
+	if float2nr(ceil(len(s:match_lists) / (5 + 0.0)))
+		echon " " printf(printf("%%%dd", len(float2nr(ceil(len(s:match_lists) / (5 + 0.0))))), s:page_nr) "/" float2nr(ceil(len(s:match_lists) / (5 + 0.0)))
+	endif
 
 	let idx = 1
 	if empty(s:match_lists)
 		echon "  "
 		echohl WarningMsg | echon "无候选词" | echohl None 
 	endif
-	for match in s:match_lists[0:4]
+	for match in s:match_lists[((s:page_nr - 1) * 5):(s:page_nr * 5 - 1)]
 		let idx = idx % 10
 		echon "  "
 		echohl LineNr | echon idx | echohl None
@@ -186,7 +218,6 @@ function! s:echo()
 		echohl Comment | echon second | echohl None
 		let idx += 1
 	endfor
-
 endfunction
 
 function! s:get_updated_cmdline()
