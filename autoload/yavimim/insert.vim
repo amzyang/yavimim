@@ -160,26 +160,39 @@ function! s:mappings()
 	" binding all keys
 	lmapclear
 	lmapclear <buffer>
-	silent execute "lnoremap" s:map_args "<CR>" "<C-R>=yavimim#insert#enter()<CR>"
-	silent execute "lnoremap" s:map_args "<Space>" "<C-R>=yavimim#insert#space()<CR>"
-	silent execute "lnoremap" s:map_args "<BS>" "<C-R>=yavimim#insert#backspace()<CR>"
-	silent execute "lnoremap" s:map_args "<C-H>" "<C-R>=yavimim#insert#backspace()<CR>"
+	silent execute "lnoremap" s:map_args "<CR>"
+				\ "<C-R>=yavimim#insert#enter()<CR>"
+	silent execute "lnoremap" s:map_args "<Space>"
+				\ "<C-R>=yavimim#insert#space()<CR>"
+	silent execute "lnoremap" s:map_args "<BS>"
+				\ "<C-R>=yavimim#insert#backspace()<CR>"
+	silent execute "lnoremap" s:map_args "<C-H>"
+				\ "<C-R>=yavimim#insert#backspace()<CR>"
 	" 只在补全可见时禁用，其它时候可用
 	silent execute "lnoremap" s:map_args "<Home> <Nop>"
 	silent execute "lnoremap" s:map_args "<End> <Nop>"
-	silent execute "lnoremap" s:map_args "<C-E>" "<C-R>=yavimim#insert#ctrl_e()<CR>"
+	silent execute "lnoremap" s:map_args "<C-E>"
+				\ "<C-R>=yavimim#insert#ctrl_e()<CR>"
 	silent execute "lnoremap" s:map_args "<Up>"
 				\ "<C-R>=g:change_cursor_pmenu_position(-1)<CR><Up>"
 	silent execute "lnoremap" s:map_args "<Down>"
 				\ "<C-R>=g:change_cursor_pmenu_position(1)<CR><Down>"
 	silent execute "lnoremap <expr>" s:map_args "-"
-				\ "pumvisible() ? yavimim#insert#page(-1) . '<C-E><C-X><C-O><C-P>' : '-'"
+				\ "pumvisible() ?"
+				\ "yavimim#insert#page(-1) . '<C-E><C-X><C-O><C-P>' :"
+				\ "'-'"
 	silent execute "lnoremap <expr>" s:map_args "<PageUp>"
-				\ "pumvisible() ? yavimim#insert#page(-1) . '<C-E><C-X><C-O><C-P>' : '<PageUp>'"
+				\ "pumvisible() ?"
+				\ "yavimim#insert#page(-1) . '<C-E><C-X><C-O><C-P>' :"
+				\ "'<PageUp>'"
 	silent execute "lnoremap <expr>" s:map_args "="
-				\ "pumvisible() ? yavimim#insert#page(1) . '<C-E><C-X><C-O><C-P>' : '='"
+				\ "pumvisible() ?"
+				\ "yavimim#insert#page(1) . '<C-E><C-X><C-O><C-P>' :"
+				\ "'='"
 	silent execute "lnoremap <expr>" s:map_args "<PageDown>"
-				\ "pumvisible() ? yavimim#insert#page(1) . '<C-E><C-X><C-O><C-P>' : '<PageDown>'"
+				\ "pumvisible() ?"
+				\ "yavimim#insert#page(1) . '<C-E><C-X><C-O><C-P>' :"
+				\ "'<PageDown>'"
 	" silent execute "lnoremap" s:map_args "<C-U>"
 				" \ "<C-R>=g:do_after_cancel()<CR><C-U>"
 	call s:lmap_punctuations()
@@ -376,8 +389,9 @@ function! g:yavimim_omnifunc(findstart, base)
 	else
 		let l:matches = []
 		let l:index = 1
-		let match_length = len(b:yavimim.match_lists)
-		let total_nr = float2nr(ceil(match_length / yavimim#util#nr2float(&pumheight)))
+		let length = len(b:yavimim.match_lists)
+		let total_nr =
+					\ float2nr(ceil(length / yavimim#util#nr2float(&pumheight)))
 		if b:yavimim.page_nr < 1
 			let b:yavimim.page_nr = total_nr
 		elseif b:yavimim.page_nr > total_nr
@@ -389,7 +403,8 @@ function! g:yavimim_omnifunc(findstart, base)
 		let max_length = yavimim#util#maxlength(final_list)
 		for l:match in final_list
 			let [l:word, l:menu] = yavimim#backend#wubi_qq_spliter(l:match)
-			let l:abbr = printf("%d %s", l:index % 10, printf(printf("%%-%ds", max_length), l:match))
+			let l:abbr = printf("%d %s", l:index % 10,
+						\ printf(printf("%%-%ds", max_length), l:match))
 			call add(l:matches, {'word': l:word, 'abbr': l:abbr})
 			let l:index += 1
 		endfor
