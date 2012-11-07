@@ -95,7 +95,8 @@ function! yavimim#cmdline#letter(char)
 			endif
 			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
 			call s:echo()
-		elseif nr == "\<Space>"
+		" space
+		elseif nr == 32
 			if !empty(s:match_lists)
 				let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
 				return s:do_commit(s:word_return())
@@ -222,12 +223,8 @@ function! s:echo()
 endfunction
 
 function! s:get_updated_cmdline()
-	let commandline = s:cmdline
-	if len(commandline) == s:cmdpos - 2
-		let commandline_update = commandline . keys
-	else
-		let commandline_update = commandline[:s:cmdpos - 2] . s:keys . commandline[s:cmdpos - 1:]
-	endif
-	return getcmdtype() . commandline_update
+	let commandline = s:cmdline[:s:cmdpos - 2] . s:keys .
+				\ s:cmdline[s:cmdpos - 1:]
+	return getcmdtype() . commandline
 endfunction
 
