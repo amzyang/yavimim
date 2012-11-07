@@ -37,9 +37,10 @@ function! s:mappings()
 endfunction
 
 function! s:lmap_letters()
-	for l:letter in range(char2nr('a'), char2nr('z'))
-		silent execute printf("lnoremap <silent> %s %s <C-R>=yavimim#cmdline#letter('%s')<CR>",
-					\ s:map_args, nr2char(l:letter), nr2char(l:letter))
+	for number in range(char2nr('a'), char2nr('z'))
+		let char = nr2char(number)
+		silent execute "lnoremap <silent>" s:map_args char
+					\ printf("<C-R>=yavimim#cmdline#letter('%s')<CR>", char)
 	endfor
 endfunction
 
@@ -63,10 +64,10 @@ function! yavimim#cmdline#letter(char)
 		if char =~ '\l'
 			let s:keys .= char
 			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
-			let s:page_nr = 1
 			if len(s:match_lists) == 1
 					return s:do_commit(s:word_return())
 			else
+				let s:page_nr = 1
 				call s:echo()
 			endif
 		" digit
@@ -94,6 +95,7 @@ function! yavimim#cmdline#letter(char)
 				return s:do_cancel_commit()
 			endif
 			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
+			let s:page_nr = 1
 			call s:echo()
 		" space
 		elseif nr == 32
@@ -112,7 +114,7 @@ function! yavimim#cmdline#letter(char)
 			else
 				return s:do_commit(s:word_return()) . trans
 			endif
-		elseif char == "'" || char == '"' || char == ']'
+		elseif index(["'", '"', ']'], char) >= 0
 			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
 			let type = 'single'
 			if char == '"'
@@ -127,15 +129,15 @@ function! yavimim#cmdline#letter(char)
 				return s:do_commit(s:word_return()) . trans
 			endif
 		" -=翻页
-		elseif char == "-" || char == "=" || nr == "\<PageUp>" || nr == "\<PageDown>"
-			if char == "-" || nr == "\<PageUp>"
+		elseif index(["-", "=", "\<PageUp>", "\<PageDown>"], char) >= 0
+			if index(["-", "\<PageUp>"], char) >= 0
 				let s:page_nr -= 1
 				if s:page_nr < 1
-					let s:page_nr = float2nr(ceil(len(s:match_lists) / (5 + 0.0)))
+					let s:page_nr = s:total_pagenr()
 				endif
 			else
 				let s:page_nr += 1
-				if s:page_nr > float2nr(ceil(len(s:match_lists) / (5 + 0.0)))
+				if s:page_nr > s:total_pagenr()
 					let s:page_nr = 1
 				endif
 			endif
@@ -193,7 +195,8 @@ endfunction
 function! yavimim#cmdline#quote(type)
 	let pairs = yavimim#punctuation#getpairs()
 	silent execute printf("let s:cmdline_%s_quote += 1", a:type)
-	silent execute printf("return pairs.%s[(s:cmdline_%s_quote - 1) %% 2]", a:type, a:type)
+	silent execute printf("return pairs.%s[(s:cmdline_%s_quote - 1) %% 2]",
+				\ a:type, a:type)
 endfunction
 
 
@@ -201,9 +204,8 @@ function! s:echo()
 	let new_cmd = s:get_updated_cmdline()
 	echo new_cmd
 	echohl Title | echon "\n[五]" | echohl None
-	if float2nr(ceil(len(s:match_lists) / (5 + 0.0)))
-		echon " " printf(printf("%%%dd", len(float2nr(ceil(len(s:match_lists) / (5 + 0.0))))), s:page_nr) "/" float2nr(ceil(len(s:match_lists) / (5 + 0.0)))
-	endif
+	let total_pagenr = s:total_pagenr()
+	echon s:pager_label(s:page_nr, total_pagenr)
 
 	let idx = 1
 	if empty(s:match_lists)
@@ -222,9 +224,21 @@ function! s:echo()
 	endfor
 endfunction
 
+function! s:pager_label(current, total)
+	if a:total > 1
+		return  " " . printf(printf("%%%dd", len(a:total)), a:current)
+					\ . "/" . a:total
+	else
+		return ""
+	endif
+endfun
+
+function! s:total_pagenr()
+	return float2nr(ceil(len(s:match_lists) / yavimim#util#nr2float(5)))
+endfunction
+
 function! s:get_updated_cmdline()
 	let commandline = s:cmdline[:s:cmdpos - 2] . s:keys .
 				\ s:cmdline[s:cmdpos - 1:]
 	return getcmdtype() . commandline
 endfunction
-
