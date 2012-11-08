@@ -3,7 +3,7 @@ scriptencoding utf-8
 " ==============================================================================
 " initialization
 " ==============================================================================
-let s:map_args= "<silent> <buffer> <unique>"
+let s:map_args= "<silent> <buffer>"
 
 function! yavimim#insert#toggle(...)
 	call s:plugin_compatible()
@@ -218,7 +218,7 @@ function! yavimim#insert#en()
 		let key = '\<C-R>=g:do_after_cancel()\<CR>'
 	endif
 	let key .= "\<C-R>=yavimim#insert#en_pre()\<CR>"
-	let key .= "\<C-R>=input('[EN] ')\<CR>"
+	let key .= "\<C-R>=input('[EN]: ')\<CR>"
 	let key .= "\<C-R>=yavimim#insert#en_post()\<CR>"
 	silent execute printf('return "%s"', key)
 endfunction
