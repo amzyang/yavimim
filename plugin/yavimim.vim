@@ -6,8 +6,8 @@ endif
 
 let g:yavimim = {}
 
-inoremap <silent> <unique> <expr>  yavimim#toggle_insert()
-cnoremap <silent> <unique> <expr>  yavimim#toggle_cmdline()
+inoremap <silent> <expr>  yavimim#toggle_insert()
+cnoremap <silent> <expr>  yavimim#toggle_cmdline()
 
 " usage
 " YDebug b:yavimim,g:yavimim
