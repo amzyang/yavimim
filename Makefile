@@ -8,6 +8,7 @@ SOURCE += autoload/yavimim/backend.vim
 SOURCE += autoload/yavimim/cmdline.vim
 SOURCE += autoload/yavimim/highlight.vim
 SOURCE += autoload/yavimim/insert.vim
+SOURCE += autoload/yavimim/powerline.vim
 SOURCE += autoload/yavimim/punctuation.vim
 SOURCE += autoload/yavimim/user_config.vim
 SOURCE += autoload/yavimim/util.vim

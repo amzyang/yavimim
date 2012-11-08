@@ -20,10 +20,10 @@ augroup YaVimIM
 				\ | call Pl#Theme#RemoveSegment('yavimim:statusline')
 				\ | call Pl#Theme#InsertSegment('yavimim:statusline',
 					\'before', 'fileformat')
-				\ | call yavimim#util#powerline_inject()
+				\ | call yavimim#powerline#inject()
 				\ | endif
 	autocmd SourcePre *autoload/Powerline/Themes/*.vim
 				\ if exists('g:Powerline_loaded') && g:Powerline_loaded
-				\ | call yavimim#util#powerline_hook()
+				\ | call yavimim#powerline#hook()
 				\ | endif
 augroup END
