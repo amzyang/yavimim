@@ -2,6 +2,8 @@
 scriptencoding utf-8
 
 let s:yavimim = {}
+let s:yavimim.metadatas = {'wubi': {'full': '五笔', 'short': '五'},
+			\ 'pinyin': {'full': '拼音', 'short': '拼'}}
 
 function! yavimim#backend#wubi_qq_spliter(string)
 	" '你好vb' => ['你好', 'vb']
@@ -22,32 +24,50 @@ function! yavimim#backend#wubi_qq_spliter(string)
 endfunction
 
 function! yavimim#backend#get_match_lists(im, key)
-	if empty(a:im.lines) && a:im.type != 'cloud'
-		" @TODO: can we access l:path?
-		let l:path = a:im.path
-		let l:lines = readfile(l:path)
-		let a:im.lines = l:lines
-	endif
-	let l:index = s:find_sorted_idx(a:im.lines, a:key)
+	let lines = s:getlines(a:im)
+	let l:index = s:find_sorted_idx(lines, a:key)
 	if l:index == -1
 		return []
 	else
-		let l:line = a:im.lines[l:index]
-		try
-			if &enc != 'utf-8'
-				let l:line = iconv(l:line, 'utf-8', &enc)
-				" 移除编码转换失败词组
-				let pattern = '?\+\l*'
-				let l:line = substitute(l:line, pattern, '', 'g')
-			endif
-		catch /.*/
-			echoerr "Maybe iconv feature is missing.
-						\ See http://www.vim.org/download.php for more details."
-		endtry
+		let l:line = s:encoding(lines[l:index])
 		let l:parts = split(l:line, '\s\+')
 		call remove(l:parts, 0)
 		return l:parts
 	endif
+endfunction
+
+function! yavimim#backend#title()
+endfunction
+
+function! s:getlines(im)
+	let cht = ''
+	if exists('g:yavimim_traditional') && g:yavimim_traditional
+		let cht = '_cht'
+	endif
+	if !has_key(a:im, 'lines'.cht) && a:im.type != 'cloud'
+		" @TODO: can we access l:path?
+		let l:path = a:im['path'.cht]
+		let lines = readfile(l:path)
+		let a:im['lines'.cht] = lines
+	endif
+	return a:im['lines'.cht]
+endfunction
+
+function! s:encoding(line)
+	if &enc == 'utf-8'
+		return a:line
+	endif
+	try
+		let a:line = iconv(a:line, 'utf-8', &enc)
+		" 移除编码转换失败词组
+		let pattern = '?\+\l*'
+		let a:line = substitute(a:line, pattern, '', 'g')
+		return a:line
+	catch /.*/
+		echoerr "Maybe iconv feature is missing.
+					\ See http://www.vim.org/download.php for more details."
+		return ''
+	endtry
 endfunction
 
 function! s:find_sorted_idx(list, key)
@@ -81,20 +101,40 @@ function! s:find_sorted_idx(list, key)
 endfunction
 
 function! yavimim#backend#setup_backend()
-	let l:wubi_qqs = split(globpath(&rtp, 'autoload/yavimim/wubi/qq.txt'), '\n')
-	if len(l:wubi_qqs) > 0
-		silent call yavimim#util#show_message()
-	endif
 	let s:yavimim.backends = {
-				\ 'wubi_qq': {'path': l:wubi_qqs[0],
+				\ 'wubi_qq': {'id': 'qq',
 					\ 'type': 'wubi',
-					\ 'keys': [],
-					\ 'lines':[],
 					\ 'name': 'QQ云五笔'}
 				\ }
-	let s:yavimim.metadatas = {'wubi': {'full': '五笔', 'short': '五'},
-				\ 'pinyin': {'full': '拼音', 'short': '拼'}}
-	let s:yavimim.im = s:yavimim.backends.wubi_qq
+	for [key, im] in items(s:yavimim.backends)
+		let paths = s:getpaths(im)
+		if join(paths, '') == ''
+			call remove(dict, key)
+		else
+			let im.path = paths[0]
+			let im.path_cht = paths[1]
+		endif
+	endfor
+	let keys = keys(s:yavimim.backends)
+	let s:yavimim.im = s:yavimim.backends[keys[0]]
+endfunction
+
+function! s:getpaths(im)
+	let paths = []
+	for cht in ['', '_cht']
+		let relative = printf('autoload/yavimim/%s/%s%s.txt',
+					\ a:im.type, a:im.id, cht)
+		let path = split(globpath(&rtp, relative), '\n')
+		if len(path) > 0
+			if len(path) > 1
+				silent call yavimim#util#show_message()
+			endif
+			call add(paths, path[0])
+		else
+			call add(paths, '')
+		endif
+	endfor
+	return paths
 endfunction
 
 function! yavimim#backend#getim()
