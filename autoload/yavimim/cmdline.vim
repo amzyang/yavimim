@@ -39,8 +39,8 @@ endfunction
 
 function! yavimim#cmdline#en()
 	call inputsave()
-	echohl Title
-	let string = input("[EN]: ")
+	echohl Comment
+	let string = input(">> ")
 	echohl None
 	call inputrestore()
 	return string
@@ -213,7 +213,7 @@ endfunction
 function! s:echo()
 	let new_cmd = s:get_updated_cmdline()
 	echo new_cmd
-	echohl Title | echon "\n[五]" | echohl None
+	echohl Comment | echon "\n[五]" | echohl None
 	let total_pagenr = s:total_pagenr()
 	echon s:pager_label(s:page_nr, total_pagenr)
 
@@ -225,7 +225,7 @@ function! s:echo()
 	for match in s:match_lists[((s:page_nr - 1) * 5):(s:page_nr * 5 - 1)]
 		let idx = idx % 10
 		echon "  "
-		echohl LineNr | echon idx | echohl None
+		echohl Number | echon idx | echohl None
 		echon "."
 		let [first, second] = yavimim#backend#wubi_qq_spliter(match)
 		echon first
