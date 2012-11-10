@@ -58,7 +58,7 @@ function! yavimim#cmdline#letter(char)
 	let s:cmdline = getcmdline()
 	let s:cmdpos = getcmdpos()
 	let s:cmdtype = getcmdtype()
-	let im = yavimim#getim()
+	let im = yavimim#backend#getim()
 	let s:keys = a:char
 	let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
 	call s:echo()

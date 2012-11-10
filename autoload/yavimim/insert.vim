@@ -336,7 +336,7 @@ function! yavimim#insert#number(number)
 endfunction
 
 function! yavimim#insert#letter(char)
-	let im = yavimim#getim()
+	let im = yavimim#backend#getim()
 	return s:lmap_letter_{im.type}(a:char)
 endfunction
 
@@ -404,7 +404,8 @@ function! g:yavimim_omnifunc(findstart, base)
 					\[b:yavimim.cursor.column:col('.') - 2]
 		let b:yavimim.base = base
 		let b:yavimim.match_lists =
-					\ yavimim#backend#get_match_lists(yavimim#getim(), base)
+					\ yavimim#backend#get_match_lists(yavimim#backend#getim(),
+						\ base)
 		if !len(b:yavimim.match_lists)
 			return -3
 		endif
