@@ -13,6 +13,7 @@ SOURCE += autoload/yavimim/punctuation.vim
 SOURCE += autoload/yavimim/user_config.vim
 SOURCE += autoload/yavimim/util.vim
 SOURCE += autoload/yavimim/wubi/qq.txt
+SOURCE += autoload/yavimim/wubi/qq_cht.txt
 
 all: ${PLUGIN}.vmb
 
