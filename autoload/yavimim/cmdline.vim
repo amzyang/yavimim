@@ -2,11 +2,6 @@
 scriptencoding utf-8
 
 let s:map_args = ''
-let s:cmdline_single_quote = 0
-let s:cmdline_double_quote = 0
-let s:cmdline_square_quote = 0
-
-autocmd YaVimIM CmdwinEnter call s:cmdline_reset()
 
 function! s:cmdline_reset()
 	let s:cmdline_single_quote = 0
@@ -15,6 +10,7 @@ function! s:cmdline_reset()
 endfunction
 
 function! yavimim#cmdline#toggle()
+	call s:cmdline_reset()
 	let s:cmdpos = getcmdpos() - 1
 	let s:match_lists = []
 	let s:page_nr = 1

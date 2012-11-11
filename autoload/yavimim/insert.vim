@@ -82,6 +82,7 @@ function! s:init_buffer()
 				\ | let b:yavimim.tmp = &l:iminsert
 				\ | let &l:iminsert = b:yavimim.iminsert_saved
 				\ | let b:yavimim.iminsert_saved = b:yavimim.tmp
+				\ | let &l:imsearch = 0
 	autocmd YaVimIM BufWinEnter <buffer>
 				\ if !exists('b:vimim') && &l:modifiable
 				\ | let &l:iminsert = 0
