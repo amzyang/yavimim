@@ -3,14 +3,7 @@ scriptencoding utf-8
 
 let s:map_args = ''
 
-function! s:cmdline_reset()
-	let s:cmdline_single_quote = 0
-	let s:cmdline_double_quote = 0
-	let s:cmdline_square_quote = 0
-endfunction
-
 function! yavimim#cmdline#toggle()
-	call s:cmdline_reset()
 	let s:cmdpos = getcmdpos() - 1
 	let s:match_lists = []
 	let s:page_nr = 1
@@ -199,10 +192,11 @@ function! s:lmap_punctuations()
 endfunction
 
 function! yavimim#cmdline#quote(type)
-	let pairs = yavimim#punctuation#getpairs()
-	silent execute printf("let s:cmdline_%s_quote += 1", a:type)
-	silent execute printf("return pairs.%s[(s:cmdline_%s_quote - 1) %% 2]",
-				\ a:type, a:type)
+	let pairs = yavimim#punctuation#getpairs()[a:type]
+	let full_cmdline = getcmdline()
+	let cmdpos = getcmdpos()
+	let string = full_cmdline[:cmdpos - 2]
+	return s:fetch_paired(pairs, string)
 endfunction
 
 
@@ -247,4 +241,26 @@ function! s:get_updated_cmdline()
 	let commandline = s:cmdline[:s:cmdpos - 2] . s:keys .
 				\ s:cmdline[s:cmdpos - 1:]
 	return getcmdtype() . commandline
+endfunction
+
+function! s:fetch_paired(pairs, string)
+	let stack = []
+	let i = 0
+	let length = strlen(substitute(a:string, ".", "x", "g"))
+	while i < length
+		let char = strpart(a:string, byteidx(a:string, i),
+					\ byteidx(a:string , i+1) - byteidx(a:string, i))
+		if index(a:pairs, char) >= 0
+			if empty(stack)
+				call add(stack, char)
+			elseif char == stack[len(stack) - 1]
+				call remove(stack, len(stack) - 1)
+			else
+				call add(stack, char)
+			endif
+		endif
+		let i += 1
+	endwhile
+	let idx = empty(stack) ? 0 : (index(a:pairs, stack[len(stack) - 1]) + 1) % 2
+	return a:pairs[idx]
 endfunction
