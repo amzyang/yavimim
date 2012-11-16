@@ -2,6 +2,7 @@
 scriptencoding utf-8
 
 let s:map_args = ''
+highlight! link YaVimIM Visual
 
 function! yavimim#cmdline#toggle()
 	let s:cmdpos = getcmdpos() - 1
@@ -49,7 +50,7 @@ function! yavimim#cmdline#letter(char)
 	let s:cmdtype = getcmdtype()
 	let im = yavimim#backend#getim()
 	let s:keys = a:char
-	let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
+	let s:match_lists = yavimim#backend#get_match_lists(s:keys)
 	call s:echo()
 	while 1
 		let nr = getchar()
@@ -62,9 +63,9 @@ function! yavimim#cmdline#letter(char)
 		" lowercase character
 		if char =~ '\l'
 			let s:keys .= char
-			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
+			let s:match_lists = yavimim#backend#get_match_lists(s:keys)
 			if len(s:match_lists) == 1
-					return s:do_commit(s:word_return())
+					return s:do_commit(s:match_return())
 			else
 				let s:page_nr = 1
 				call s:echo()
@@ -77,8 +78,8 @@ function! yavimim#cmdline#letter(char)
 			endif
 			if (s:page_nr -1) * 5 + char > len(s:match_lists) || char > 5
 			else
-				let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
-				return s:do_commit(s:word_return(char - 1))
+				let s:match_lists = yavimim#backend#get_match_lists(s:keys)
+				return s:do_commit(s:match_return(char - 1))
 			endif
 		" backspace/ctrl-h
 		elseif nr == "\<BS>" || nr == 8
@@ -93,28 +94,28 @@ function! yavimim#cmdline#letter(char)
 			else
 				return s:do_cancel_commit()
 			endif
-			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
+			let s:match_lists = yavimim#backend#get_match_lists(s:keys)
 			let s:page_nr = 1
 			call s:echo()
 		" space
 		elseif nr == 32
 			if !empty(s:match_lists)
-				let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
-				return s:do_commit(s:word_return())
+				let s:match_lists = yavimim#backend#get_match_lists(s:keys)
+				return s:do_commit(s:match_return())
 			endif	
 		elseif nr == "\<Enter>"
 			return s:do_cancel_commit()
 		" 普通标点
 		elseif yavimim#punctuation#is_in(char)
-			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
+			let s:match_lists = yavimim#backend#get_match_lists(s:keys)
 			let trans = yavimim#punctuation#origin2trans(char)
 			if empty(s:match_lists)
 				return s:do_cancel_commit() . trans
 			else
-				return s:do_commit(s:word_return()) . trans
+				return s:do_commit(s:match_return()) . trans
 			endif
 		elseif index(["'", '"', ']'], char) >= 0
-			let s:match_lists = yavimim#backend#get_match_lists(im, s:keys)
+			let s:match_lists = yavimim#backend#get_match_lists(s:keys)
 			let type = 'single'
 			if char == '"'
 				let type = 'double'
@@ -125,7 +126,7 @@ function! yavimim#cmdline#letter(char)
 			if empty(s:match_lists)
 				return s:do_cancel_commit() . trans
 			else
-				return s:do_commit(s:word_return()) . trans
+				return s:do_commit(s:match_return()) . trans
 			endif
 		" -=翻页
 		elseif index(["-", "=", "\<PageUp>", "\<PageDown>"], char) >= 0
@@ -148,7 +149,7 @@ function! yavimim#cmdline#letter(char)
 	return ''
 endfunction
 
-function! s:word_return(...)
+function! s:match_return(...)
 	let idx = (s:page_nr - 1) * 5
 	if a:0
 		let idx += a:1
@@ -156,10 +157,10 @@ function! s:word_return(...)
 	return s:match_lists[idx]
 endfunction
 
-function! s:do_commit(string)
+function! s:do_commit(match)
 	let s:page_nr = 1
 	let s:keys = ''
-	let [first, second] = yavimim#backend#wubi_qq_spliter(a:string)
+	let [first, second] = a:match
 	call s:echo()
 	return first
 endfunction
@@ -199,10 +200,13 @@ function! yavimim#cmdline#quote(type)
 	return s:fetch_paired(pairs, string)
 endfunction
 
-
 function! s:echo()
-	let new_cmd = s:get_updated_cmdline()
-	echo new_cmd
+	let pieces = s:get_updated_cmdline()
+	redraw
+	echon pieces[0] pieces[1]
+	echohl YaVimIM | echon pieces[2] | echohl None
+	echon pieces[3]
+	echo
 	echohl Comment | echon "\n[五]" | echohl None
 	let total_pagenr = s:total_pagenr()
 	echon s:pager_label(s:page_nr, total_pagenr)
@@ -212,12 +216,13 @@ function! s:echo()
 		echon "  "
 		echohl WarningMsg | echon "无候选词" | echohl None 
 	endif
-	for match in s:match_lists[((s:page_nr - 1) * 5):(s:page_nr * 5 - 1)]
+	let matches = s:match_lists[((s:page_nr - 1) * 5):(s:page_nr * 5 - 1)] 
+	for match in matches
 		let idx = idx % 10
 		echon "  "
 		echohl Number | echon idx | echohl None
 		echon "."
-		let [first, second] = yavimim#backend#wubi_qq_spliter(match)
+		let [first, second] = match
 		echon first
 		echohl Comment | echon second | echohl None
 		let idx += 1
@@ -238,9 +243,8 @@ function! s:total_pagenr()
 endfunction
 
 function! s:get_updated_cmdline()
-	let commandline = s:cmdline[:s:cmdpos - 2] . s:keys .
-				\ s:cmdline[s:cmdpos - 1:]
-	return getcmdtype() . commandline
+	return [getcmdtype(), s:cmdline[:s:cmdpos - 2],
+				\ s:keys, s:cmdline[s:cmdpos - 1:]]
 endfunction
 
 function! s:fetch_paired(pairs, string)

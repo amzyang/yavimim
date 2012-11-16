@@ -19,4 +19,4 @@ endfunction
 " conceal???
 highlight  default lCursorIM guifg=NONE guibg=green gui=NONE
 highlight! link lCursor lCursorIM
-highlight link YaVimIM Visual
+highlight! link YaVimIM Visual

@@ -405,8 +405,7 @@ function! g:yavimim_omnifunc(findstart, base)
 					\[b:yavimim.cursor.column:col('.') - 2]
 		let b:yavimim.base = base
 		let b:yavimim.match_lists =
-					\ yavimim#backend#get_match_lists(yavimim#backend#getim(),
-						\ base)
+					\ yavimim#backend#get_match_lists(base)
 		if !len(b:yavimim.match_lists)
 			return -3
 		endif
@@ -427,9 +426,9 @@ function! g:yavimim_omnifunc(findstart, base)
 		let final_list = b:yavimim.match_lists[one : two]
 		let max_length = yavimim#util#maxlength(final_list)
 		for l:match in final_list
-			let [l:word, l:menu] = yavimim#backend#wubi_qq_spliter(l:match)
+			let [l:word, l:menu] = l:match
 			let l:abbr = printf("%d %s", l:index % 10,
-						\ printf(printf("%%-%ds", max_length), l:match))
+						\ printf(printf("%%-%ds", max_length), join(l:match, '')))
 			call add(l:matches, {'word': l:word, 'abbr': l:abbr})
 			let l:index += 1
 		endfor
