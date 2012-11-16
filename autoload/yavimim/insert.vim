@@ -403,6 +403,9 @@ function! g:yavimim_omnifunc(findstart, base)
 		call s:fix_cursor_position()
 		let base = getline(b:yavimim.cursor.line)
 					\[b:yavimim.cursor.column:col('.') - 2]
+		if !len(base)
+			return -3
+		endif
 		let b:yavimim.base = base
 		let b:yavimim.match_lists =
 					\ yavimim#backend#get_match_lists(base)
