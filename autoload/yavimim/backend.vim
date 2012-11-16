@@ -170,9 +170,6 @@ function! s:find_sorted_match(list, key)
 		endif
 		let mid = (low + high) / 2
 		let line = a:list[mid]
-		if mid >= len(a:list)
-			break
-		endif
 	endwhile
 
 	if line =~ a:key
