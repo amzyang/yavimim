@@ -105,6 +105,10 @@ function! yavimim#cmdline#letter(char)
 			endif	
 		elseif nr == "\<Enter>"
 			return s:do_cancel_commit()
+		" <Ctrl-E>
+		elseif nr == 5
+			let s:keys = ''
+			return s:do_cancel_commit()
 		" 普通标点
 		elseif yavimim#punctuation#is_in(char)
 			let s:match_lists = yavimim#backend#get_match_lists(s:keys)
