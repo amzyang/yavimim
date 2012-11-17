@@ -51,12 +51,3 @@ endfunction
 function! yavimim#util#nr2float(number)
 	return a:number + 0.0
 endfunction
-
-function! yavimim#util#maxlength(list)
-	let max_length = 0
-	for item in a:list
-		let length = len(item)
-		let max_length = (max_length < length) ? length : max_length
-	endfor
-	return max_length
-endfunction

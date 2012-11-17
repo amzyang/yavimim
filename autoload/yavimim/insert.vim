@@ -56,7 +56,6 @@ function! s:yavimim_start_insert()
 endfunction
 
 function! s:reset_start_insert()
-	let b:yavimim.match_lists = []
 	let b:yavimim.state = 0
 	call s:set_cursor_position()
 endfunction
@@ -70,7 +69,6 @@ endf
 
 function! s:init_buffer()
 	let b:yavimim = {}
-	let b:yavimim.match_lists = []
 	let b:yavimim.state = 0
 	let b:yavimim.pmenu = 0
 	let b:yavimim.base = ''
@@ -114,7 +112,6 @@ endfunction
 
 function! g:do_after_commit()
 	let b:yavimim.state = 0
-	let b:yavimim.match_lists = []
 	let b:yavimim.pmenu = 0
 	call s:set_cursor_position()
 	call yavimim#highlight#predict()
@@ -130,7 +127,6 @@ endfunction
 
 function! g:do_after_cancel()
 	let b:yavimim.state = 0
-	let b:yavimim.match_lists = []
 	call s:set_cursor_position()
 	call yavimim#highlight#predict()
 	return ''
@@ -145,7 +141,7 @@ function! g:set_after_insert_beside_chinese()
 endfunction
 
 function! g:do_trigger_completion()
-	if pumvisible() && len(b:yavimim.match_lists) == 1
+	if pumvisible() && g:yavimim_only
 		silent execute printf('return "%s"',
 					\ '\<C-Y>\<C-R>=g:do_after_commit()\<CR>')
 	endif
@@ -348,7 +344,7 @@ function! s:lmap_letter_wubi(char)
 	call s:fix_cursor_position()
 	let l:len = col('.') - b:yavimim.cursor.column - 1
 	let key = ''
-	if pumvisible() && (l:len == 4 || len(b:yavimim.match_lists) == 1)
+	if pumvisible() && (l:len == 4 || g:yavimim_only)
 		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
 	endif
 	let key .= a:char . '\<C-R>=g:do_waiting_commit()\<CR>' .
@@ -407,38 +403,13 @@ function! g:yavimim_omnifunc(findstart, base)
 			return -3
 		endif
 		let b:yavimim.base = base
-		let b:yavimim.match_lists =
-					\ yavimim#backend#get_match_lists(base)
-		if !len(b:yavimim.match_lists)
+		let b:yavimim.has = yavimim#backend#has(base)
+		if !b:yavimim.has
 			return -3
 		endif
 		return b:yavimim.cursor.column
 	else
-		let l:matches = []
-		let l:index = 1
-		let length = len(b:yavimim.match_lists)
-		let total_nr =
-					\ float2nr(ceil(length / yavimim#util#nr2float(&pumheight)))
-		if b:yavimim.page_nr < 1
-			let b:yavimim.page_nr = total_nr
-		elseif b:yavimim.page_nr > total_nr
-			let b:yavimim.page_nr = 1
-		endif
-		let one = (b:yavimim.page_nr - 1) * &pumheight
-		let two = one + &pumheight - 1
-		let final_list = b:yavimim.match_lists[one : two]
-		let max_length = yavimim#util#maxlength(final_list)
-		for l:match in final_list
-			let [l:word, l:menu] = l:match
-			let l:abbr = printf("%d %s", l:index % 10,
-						\ printf(printf("%%-%ds", max_length), join(l:match, '')))
-			call add(l:matches, {'word': l:word, 'abbr': l:abbr})
-			let l:index += 1
-		endfor
-		if total_nr != 1
-			let l:matches[0].kind = printf("%d/%d", b:yavimim.page_nr, total_nr)
-		endif
-		return {'words': l:matches}
+		return yavimim#backend#matches(b:yavimim.base, 'insert')
 	endif
 endfunction
 

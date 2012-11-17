@@ -2,12 +2,13 @@
 scriptencoding utf-8
 
 let s:map_args = ''
+let g:_yavimim_page_nr = 1
 highlight! link YaVimIM Visual
 
 function! yavimim#cmdline#toggle()
 	let s:cmdpos = getcmdpos() - 1
 	let s:match_lists = []
-	let s:page_nr = 1
+	let g:_yavimim_page_nr = 1
 	let s:position = 0
 	if &iminsert != 1
 		call s:mappings()
@@ -50,7 +51,7 @@ function! yavimim#cmdline#letter(char)
 	let s:cmdtype = getcmdtype()
 	let im = yavimim#backend#getim()
 	let s:keys = a:char
-	let s:match_lists = yavimim#backend#get_match_lists(s:keys)
+	let s:match_lists = yavimim#backend#matches(s:keys, '')
 	call s:echo()
 	while 1
 		let nr = getchar()
@@ -63,23 +64,21 @@ function! yavimim#cmdline#letter(char)
 		" lowercase character
 		if char =~ '\l'
 			let s:keys .= char
-			let s:match_lists = yavimim#backend#get_match_lists(s:keys)
-			if len(s:match_lists) == 1
-					return s:do_commit(s:match_return())
+			let s:match_lists = yavimim#backend#matches(s:keys, '')
+			if g:yavimim_only
+					return s:do_commit()
 			else
-				let s:page_nr = 1
+				let g:_yavimim_page_nr = 1
 				call s:echo()
 			endif
 		" digit
 		elseif char =~ '\d'
 			" @TODO: don't overflow
-			if char == 0
-				char == 10
-			endif
-			if (s:page_nr -1) * 5 + char > len(s:match_lists) || char > 5
+			let char = char ? char : 10
+			if char > len(s:match_lists) || char > 5
 			else
-				let s:match_lists = yavimim#backend#get_match_lists(s:keys)
-				return s:do_commit(s:match_return(char - 1))
+				let s:match_lists = yavimim#backend#matches(s:keys, '')
+				return s:do_commit(char - 1)
 			endif
 		" backspace/ctrl-h
 		elseif nr == "\<BS>" || nr == 8
@@ -94,14 +93,13 @@ function! yavimim#cmdline#letter(char)
 			else
 				return s:do_cancel_commit()
 			endif
-			let s:match_lists = yavimim#backend#get_match_lists(s:keys)
-			let s:page_nr = 1
+			let s:match_lists = yavimim#backend#matches(s:keys, '')
+			let g:_yavimim_page_nr = 1
 			call s:echo()
 		" space
 		elseif nr == 32
 			if !empty(s:match_lists)
-				let s:match_lists = yavimim#backend#get_match_lists(s:keys)
-				return s:do_commit(s:match_return())
+				return s:do_commit()
 			endif	
 		elseif nr == "\<Enter>"
 			return s:do_cancel_commit()
@@ -111,15 +109,14 @@ function! yavimim#cmdline#letter(char)
 			return s:do_cancel_commit()
 		" 普通标点
 		elseif yavimim#punctuation#is_in(char)
-			let s:match_lists = yavimim#backend#get_match_lists(s:keys)
 			let trans = yavimim#punctuation#origin2trans(char)
 			if empty(s:match_lists)
 				return s:do_cancel_commit() . trans
 			else
-				return s:do_commit(s:match_return()) . trans
+				return s:do_commit() . trans
 			endif
 		elseif index(["'", '"', ']'], char) >= 0
-			let s:match_lists = yavimim#backend#get_match_lists(s:keys)
+			let s:match_lists = yavimim#backend#matches(s:keys, '')
 			let type = 'single'
 			if char == '"'
 				let type = 'double'
@@ -130,21 +127,16 @@ function! yavimim#cmdline#letter(char)
 			if empty(s:match_lists)
 				return s:do_cancel_commit() . trans
 			else
-				return s:do_commit(s:match_return()) . trans
+				return s:do_commit() . trans
 			endif
 		" -=翻页
 		elseif index(["-", "=", "\<PageUp>", "\<PageDown>"], char) >= 0
 			if index(["-", "\<PageUp>"], char) >= 0
-				let s:page_nr -= 1
-				if s:page_nr < 1
-					let s:page_nr = s:total_pagenr()
-				endif
+				let g:_yavimim_page_nr -= 1
 			else
-				let s:page_nr += 1
-				if s:page_nr > s:total_pagenr()
-					let s:page_nr = 1
-				endif
+				let g:_yavimim_page_nr += 1
 			endif
+			let s:match_lists = yavimim#backend#matches(s:keys, '')
 			call s:echo()
 		else
 			return s:do_cancel_commit()
@@ -153,24 +145,16 @@ function! yavimim#cmdline#letter(char)
 	return ''
 endfunction
 
-function! s:match_return(...)
-	let idx = (s:page_nr - 1) * 5
-	if a:0
-		let idx += a:1
-	endif
-	return s:match_lists[idx]
-endfunction
-
-function! s:do_commit(match)
-	let s:page_nr = 1
+function! s:do_commit(...)
+	let idx = a:0 > 0 ? a:1 : 0
+	let g:_yavimim_page_nr = 1
 	let s:keys = ''
-	let [first, second] = a:match
 	call s:echo()
-	return first
+	return s:match_lists[idx]['word']
 endfunction
 
 function! s:do_cancel_commit()
-	let s:page_nr = 1
+	let g:_yavimim_page_nr = 1
 	let key = s:keys
 	let s:keys = ''
 	let s:match_lists = []
@@ -206,44 +190,31 @@ endfunction
 
 function! s:echo()
 	let pieces = s:get_updated_cmdline()
-	redraw
+	redraw!
 	echon pieces[0] pieces[1]
 	echohl YaVimIM | echon pieces[2] | echohl None
 	echon pieces[3]
 	echo
 	echohl Comment | echon "\n[五]" | echohl None
-	let total_pagenr = s:total_pagenr()
-	echon s:pager_label(s:page_nr, total_pagenr)
-
-	let idx = 1
 	if empty(s:match_lists)
 		echon "  "
 		echohl WarningMsg | echon "无候选词" | echohl None 
+		return
 	endif
-	let matches = s:match_lists[((s:page_nr - 1) * 5):(s:page_nr * 5 - 1)] 
-	for match in matches
-		let idx = idx % 10
+
+	let idx = 1
+	for item in s:match_lists
 		echon "  "
-		echohl Number | echon idx | echohl None
-		echon "."
-		let [first, second] = match
-		echon first
-		echohl Comment | echon second | echohl None
+		echohl Number | echon idx % 10 | echohl None
+		echohl Comment | echon "." | echohl None
+		echon item.word
+		echohl Comment | echon item.tip | echohl None
+		echohl Comment | echon item.kind | echohl None
 		let idx += 1
 	endfor
-endfunction
-
-function! s:pager_label(current, total)
-	if a:total > 1
-		return  " " . printf(printf("%%%dd", len(a:total)), a:current)
-					\ . "/" . a:total
-	else
-		return ""
+	if g:_yavimim_total_nr > 1
+		echon " " g:_yavimim_page_nr "/" g:_yavimim_total_nr
 	endif
-endfun
-
-function! s:total_pagenr()
-	return float2nr(ceil(len(s:match_lists) / yavimim#util#nr2float(5)))
 endfunction
 
 function! s:get_updated_cmdline()
