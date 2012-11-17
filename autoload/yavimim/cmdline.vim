@@ -211,7 +211,7 @@ function! s:echo()
 			let idx += 1
 		endfor
 		if g:_yavimim_total_nr > 1
-			echon " " g:_yavimim_page_nr "/" g:_yavimim_total_nr
+			echon "  " g:_yavimim_page_nr "/" g:_yavimim_total_nr
 		endif
 	endif
 endfunction
