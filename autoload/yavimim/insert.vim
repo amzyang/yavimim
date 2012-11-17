@@ -415,7 +415,7 @@ function! g:yavimim_omnifunc(findstart, base)
 		endif
 		return b:yavimim.cursor.column
 	else
-		return yavimim#backend#matches(b:yavimim.base, 'insert')
+		return yavimim#backend#matches(b:yavimim.base)
 	endif
 endfunction
 

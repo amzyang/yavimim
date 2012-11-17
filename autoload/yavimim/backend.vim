@@ -40,7 +40,7 @@ function! yavimim#backend#has(key)
 	return index == -1 ? 0 : 1
 endfunction
 
-function! yavimim#backend#matches(key, mode)
+function! yavimim#backend#matches(key)
 	let im = s:yavimim.im
 	let lines = s:getlines(im)
 	let words = []
@@ -54,20 +54,20 @@ function! yavimim#backend#matches(key, mode)
 			let line = s:encoding(lines[index])
 			let parts = split(line, '\s\+')
 			call remove(parts, 0)
-			let matches = s:matches(parts, a:mode)
+			let matches = s:matches(parts)
 			let g:_yavimim_only = len(matches) == 1 ? 1 : 0
 			for match in matches
 				let [word, tip] = s:wbqq_spliter(match)
 				call add(words, {'word': word, 'tip': tip, 'kind': ''})
 			endfor
-			let total_nr = s:total_nr(len(parts), a:mode)
+			let total_nr = s:total_nr(len(parts))
 		else
 			let range = s:sorted_matches_range(lines, a:key)
 			if range == [-1, -1]
 				return []
 			endif
 			let length = range[1] - range[0] + 1
-			let matches = s:matches_wbpy(lines, range, a:mode)
+			let matches = s:matches_wbpy(lines, range)
 			let g:_yavimim_only = len(matches) == 1 ? 1 : 0
 			for match in matches
 				let [tip, word] = split(match)
@@ -81,12 +81,12 @@ function! yavimim#backend#matches(key, mode)
 				let tip = tip[(len(a:key) + offset) : ]
 				call add(words, {'word': word, 'tip': tip, 'kind': kind})
 			endfor
-			let total_nr = s:total_nr(length, a:mode)
+			let total_nr = s:total_nr(length)
 		endif
 	else
 	endif
-	" @TODO: 简繁转换
-	if a:mode == 'insert'
+	let mode = yavimim#util#getmode()
+	if mode == 'insert'
 		" @TODO: %S
 		call s:data_omni(words)
 		if total_nr != 1
@@ -111,17 +111,18 @@ function! s:data_omni(list)
 	endfor
 endfunction
 
-function! s:matches(list, mode)
-		let total_nr = s:total_nr(len(a:list), a:mode)
-		let page_nr = a:mode == 'insert' ?
+function! s:matches(list)
+		let total_nr = s:total_nr(len(a:list))
+		let mode = yavimim#util#getmode()
+		let page_nr = mode == 'insert' ?
 					\ b:yavimim.page_nr : g:_yavimim_page_nr
-		let num = a:mode == 'insert' ? &pumheight : g:yavimim_candidate
+		let num = mode == 'insert' ? &pumheight : g:yavimim_candidate
 		if page_nr < 1
 			let page_nr = total_nr
 		elseif page_nr > total_nr
 			let page_nr = 1
 		endif
-		if a:mode == 'insert'
+		if mode == 'insert'
 			let b:yavimim.page_nr = page_nr
 		else
 			let g:_yavimim_page_nr = page_nr
@@ -131,17 +132,18 @@ function! s:matches(list, mode)
 		return a:list[one : two]
 endfunction
 
-function! s:matches_wbpy(list, range, mode)
+function! s:matches_wbpy(list, range)
 	let length = a:range[1] - a:range[0] + 1
-	let total_nr = s:total_nr(length, a:mode)
-	let page_nr = a:mode == 'insert' ? b:yavimim.page_nr : g:_yavimim_page_nr
-	let num = a:mode == 'insert' ? &pumheight : g:yavimim_candidate
+	let total_nr = s:total_nr(length)
+	let mode = yavimim#util#getmode()
+	let page_nr = mode == 'insert' ? b:yavimim.page_nr : g:_yavimim_page_nr
+	let num = mode == 'insert' ? &pumheight : g:yavimim_candidate
 	if page_nr < 1
 		let page_nr = total_nr
 	elseif page_nr > total_nr
 		let page_nr = 1
 	endif
-	if a:mode == 'insert'
+	if mode == 'insert'
 		let b:yavimim.page_nr = page_nr
 	else
 		let g:_yavimim_page_nr = page_nr
@@ -153,8 +155,9 @@ function! s:matches_wbpy(list, range, mode)
 	return a:list[one : two]
 endfunction
 
-function! s:total_nr(length, mode)
-	let num = a:mode == 'insert' ? &pumheight : g:yavimim_candidate
+function! s:total_nr(length)
+	let mode = yavimim#util#getmode()
+	let num = mode == 'insert' ? &pumheight : g:yavimim_candidate
 	return float2nr(ceil(a:length / yavimim#util#nr2float(num)))
 endfunction
 

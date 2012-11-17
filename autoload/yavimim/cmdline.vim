@@ -49,7 +49,7 @@ function! yavimim#cmdline#letter(char)
 	let s:cmdtype = getcmdtype()
 	let im = yavimim#backend#getim()
 	let s:keys = a:char
-	let s:match_lists = yavimim#backend#matches(s:keys, '')
+	let s:match_lists = yavimim#backend#matches(s:keys)
 	call s:echo()
 	while 1
 		let nr = getchar()
@@ -62,7 +62,7 @@ function! yavimim#cmdline#letter(char)
 		" lowercase character
 		if char =~ '\l'
 			let s:keys .= char
-			let s:match_lists = yavimim#backend#matches(s:keys, '')
+			let s:match_lists = yavimim#backend#matches(s:keys)
 			if len(s:match_lists) &&
 						\ yavimim#backend#should_auto_commit(len(s:keys))
 				return s:do_commit()
@@ -75,7 +75,7 @@ function! yavimim#cmdline#letter(char)
 			let char = char ? char : 10
 			if char > len(s:match_lists) || char > g:yavimim_candidate
 			else
-				let s:match_lists = yavimim#backend#matches(s:keys, '')
+				let s:match_lists = yavimim#backend#matches(s:keys)
 				return s:do_commit(char - 1)
 			endif
 		" backspace/ctrl-h
@@ -91,7 +91,7 @@ function! yavimim#cmdline#letter(char)
 			else
 				return s:do_cancel_commit()
 			endif
-			let s:match_lists = yavimim#backend#matches(s:keys, '')
+			let s:match_lists = yavimim#backend#matches(s:keys)
 			let g:_yavimim_page_nr = 1
 			call s:echo()
 		" space
@@ -114,7 +114,7 @@ function! yavimim#cmdline#letter(char)
 				return s:do_commit() . trans
 			endif
 		elseif index(["'", '"', ']'], char) >= 0
-			let s:match_lists = yavimim#backend#matches(s:keys, '')
+			let s:match_lists = yavimim#backend#matches(s:keys)
 			let type = 'single'
 			if char == '"'
 				let type = 'double'
@@ -134,7 +134,7 @@ function! yavimim#cmdline#letter(char)
 			else
 				let g:_yavimim_page_nr += 1
 			endif
-			let s:match_lists = yavimim#backend#matches(s:keys, '')
+			let s:match_lists = yavimim#backend#matches(s:keys)
 			call s:echo()
 		else
 			return s:do_cancel_commit()
