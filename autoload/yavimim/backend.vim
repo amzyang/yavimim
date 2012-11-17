@@ -4,6 +4,8 @@ scriptencoding utf-8
 let s:yavimim = {}
 let s:yavimim.metadatas = {'wubi': {'full': '五笔', 'short': '五'},
 			\ 'pinyin': {'full': '拼音', 'short': '拼'}}
+let g:_yavimim_only = 0
+let g:_yavimim_pinyin_in_matches = 0
 
 function! s:wbqq_spliter(string)
 	" '你好vb' => ['你好', 'vb']
@@ -42,6 +44,7 @@ function! yavimim#backend#matches(key, mode)
 	let im = s:yavimim.im
 	let lines = s:getlines(im)
 	let words = []
+	let g:_yavimim_pinyin_in_matches = 0
 	if im.type == 'wubi'
 		if im.id == 'qq'
 			let index = s:find_sorted_idx(lines, a:key)
@@ -52,7 +55,7 @@ function! yavimim#backend#matches(key, mode)
 			let parts = split(line, '\s\+')
 			call remove(parts, 0)
 			let matches = s:matches(parts, a:mode)
-			let g:yavimim_only = len(matches) == 1 ? 1 : 0
+			let g:_yavimim_only = len(matches) == 1 ? 1 : 0
 			for match in matches
 				let [word, tip] = s:wbqq_spliter(match)
 				call add(words, {'word': word, 'tip': tip, 'kind': ''})
@@ -65,7 +68,7 @@ function! yavimim#backend#matches(key, mode)
 			endif
 			let length = range[1] - range[0] + 1
 			let matches = s:matches_wbpy(lines, range, a:mode)
-			let g:yavimim_only = len(matches) == 1 ? 1 : 0
+			let g:_yavimim_only = len(matches) == 1 ? 1 : 0
 			for match in matches
 				let [tip, word] = split(match)
 				if g:yavimim_traditional
@@ -73,6 +76,8 @@ function! yavimim#backend#matches(key, mode)
 				endif
 				let kind = tip[0] == '@' ? '[拼]' : ''
 				let offset = tip[0] == '@' ? 1 : 0
+				let g:_yavimim_pinyin_in_matches = offset ||
+							\ g:_yavimim_pinyin_in_matches
 				let tip = tip[(len(a:key) + offset) : ]
 				call add(words, {'word': word, 'tip': tip, 'kind': kind})
 			endfor
@@ -110,6 +115,7 @@ function! s:matches(list, mode)
 		let total_nr = s:total_nr(len(a:list), a:mode)
 		let page_nr = a:mode == 'insert' ?
 					\ b:yavimim.page_nr : g:_yavimim_page_nr
+		let num = a:mode == 'insert' ? &pumheight : g:yavimim_candidate
 		if page_nr < 1
 			let page_nr = total_nr
 		elseif page_nr > total_nr
@@ -120,9 +126,8 @@ function! s:matches(list, mode)
 		else
 			let g:_yavimim_page_nr = page_nr
 		endif
-		" @TODO: pumheight
-		let one = (page_nr - 1) * &pumheight
-		let two = one + &pumheight - 1
+		let one = (page_nr - 1) * num
+		let two = one + num - 1
 		return a:list[one : two]
 endfunction
 
@@ -166,10 +171,15 @@ function! s:getlines(im)
 		" @TODO: can we access l:path?
 		let l:path = a:im.path_store['zh'.cht]
 		let lines = readfile(l:path)
-		if a:im.id != 'qq'
+		let first_line = lines[0]
+		let pattern = '^;fcitx Version 0x03 Table file$' " fcitx 词库
+		if first_line =~ pattern
 			while lines[0] != '[Data]'
-				" @TODO
-				call remove(lines, 0)
+				let line = remove(lines, 0)
+				if line =~ '='
+					let [option, value] = split(line, '=')
+					let a:im[option] = value
+				endif
 			endwhile
 			call remove(lines, 0)
 		endif
@@ -364,4 +374,29 @@ endfunction
 function! yavimim#backend#getim()
 	" @TODO deepcopy/copy
 	return s:yavimim.im
+endfunction
+
+function! yavimim#backend#should_auto_commit(...)
+	let len = a:0 ? a:1 : 0
+	let mode = yavimim#util#getmode()
+	let length_checking = mode == 'insert' ? 4 : 5
+	" 还有拼音候选
+	if g:_yavimim_pinyin_in_matches
+		return 0
+	elseif len >= length_checking
+		return 1
+	endif
+	if g:_yavimim_only && g:yavimim_auto_commit
+		return 1
+	endif
+	return 0
+endfunction
+
+function! yavimim#backend#max_keys()
+	let im = yavimim#backend#getim()
+	if has_key(im, 'PinyinLength')
+		return max([im.Length, im.PinyinLength]) + 1
+	else
+		return 4 + 1
+	endif
 endfunction

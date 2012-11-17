@@ -29,11 +29,9 @@ function! s:mappings()
 endfunction
 
 function! yavimim#cmdline#en()
-	call inputsave()
 	echohl Comment
 	let string = input(">> ")
 	echohl None
-	call inputrestore()
 	return string
 endfunction
 
@@ -65,12 +63,12 @@ function! yavimim#cmdline#letter(char)
 		if char =~ '\l'
 			let s:keys .= char
 			let s:match_lists = yavimim#backend#matches(s:keys, '')
-			if g:yavimim_only
-					return s:do_commit()
-			else
-				let g:_yavimim_page_nr = 1
-				call s:echo()
+			if len(s:match_lists) &&
+						\ yavimim#backend#should_auto_commit(len(s:keys))
+				return s:do_commit()
 			endif
+			let g:_yavimim_page_nr = 1
+			call s:echo()
 		" digit
 		elseif char =~ '\d'
 			" @TODO: don't overflow
@@ -190,30 +188,31 @@ endfunction
 
 function! s:echo()
 	let pieces = s:get_updated_cmdline()
-	redraw!
-	echon pieces[0] pieces[1]
+	echo pieces[0].pieces[1]
 	echohl YaVimIM | echon pieces[2] | echohl None
 	echon pieces[3]
-	echo
-	echohl Comment | echon "\n[五]" | echohl None
+	echohl Comment | echon "\r\n[五]" | echohl None
 	if empty(s:match_lists)
-		echon "  "
+		echon " "
 		echohl WarningMsg | echon "无候选词" | echohl None 
-		return
-	endif
-
-	let idx = 1
-	for item in s:match_lists
-		echon "  "
-		echohl Number | echon idx % 10 | echohl None
-		echohl Comment | echon "." | echohl None
-		echon item.word
-		echohl Comment | echon item.tip | echohl None
-		echohl Comment | echon item.kind | echohl None
-		let idx += 1
-	endfor
-	if g:_yavimim_total_nr > 1
-		echon " " g:_yavimim_page_nr "/" g:_yavimim_total_nr
+	else
+		let idx = 1
+		for item in s:match_lists
+			if idx == 1
+				echon " "
+			else
+				echon "  "
+			endif
+			echohl Number | echon idx % 10 | echohl None
+			echohl Comment | echon "." | echohl None
+			echon item.word
+			echohl Comment | echon item.tip | echohl None
+			echohl Comment | echon item.kind | echohl None
+			let idx += 1
+		endfor
+		if g:_yavimim_total_nr > 1
+			echon " " g:_yavimim_page_nr "/" g:_yavimim_total_nr
+		endif
 	endif
 endfunction
 

@@ -146,7 +146,7 @@ function! g:set_after_insert_beside_chinese()
 endfunction
 
 function! g:do_trigger_completion()
-	if pumvisible() && g:yavimim_only
+	if pumvisible() && yavimim#backend#should_auto_commit()
 		silent execute printf('return "%s"',
 					\ '\<C-Y>\<C-R>=g:do_after_commit()\<CR>')
 	endif
@@ -291,7 +291,8 @@ function! yavimim#insert#backspace()
 	let key = '\<BackSpace>'
 	let step = (col('.') - 1 - b:yavimim.cursor.column)
 	" 因为此时还没开始做退格操作，在删之后是4个就要做自动补全，所以在删之前是5个
-	if step <= 5
+	" 对于混拼，则是计算拼音的长度
+	if step <= yavimim#backend#max_keys()
 		let key .= '\<C-X>\<C-O>\<C-R>=g:do_trigger_completion()\<CR>'
 	endif
 	silent execute printf('return "%s"', key)
@@ -349,7 +350,7 @@ function! s:lmap_letter_wubi(char)
 	call s:fix_cursor_position()
 	let l:len = col('.') - b:yavimim.cursor.column - 1
 	let key = ''
-	if pumvisible() && (l:len == 4 || g:yavimim_only)
+	if pumvisible() && yavimim#backend#should_auto_commit(l:len)
 		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
 	endif
 	let key .= a:char . '\<C-R>=g:do_waiting_commit()\<CR>' .
