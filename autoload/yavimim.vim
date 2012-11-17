@@ -14,10 +14,10 @@ function! yavimim#toggle_cmdline()
 endfunction
 
 function! s:init()
-	if exists('g:yavimim.init')
+	if exists('g:yavimim_initialized')
 		return
 	endif
-	let g:yavimim.init = 1
+	let g:yavimim_initialized = 1
 	runtime autoload/yavimim/user_config.vim
 	call yavimim#backend#setup_backend()
 endfunction

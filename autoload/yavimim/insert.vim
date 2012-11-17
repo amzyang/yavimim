@@ -52,6 +52,8 @@ function! s:yavimim_start_insert()
 	let b:yavimim.iminsert_saved = b:yavimim.tmp
 	if &l:iminsert == 1
 		call s:mappings()
+		let b:yavimim.pumheight_saved = &pumheight
+		let &pumheight = g:yavimim_pumheight
 	endif
 endfunction
 
@@ -81,6 +83,9 @@ function! s:init_buffer()
 				\ | let &l:iminsert = b:yavimim.iminsert_saved
 				\ | let b:yavimim.iminsert_saved = b:yavimim.tmp
 				\ | let &l:imsearch = 0
+				\ | let b:yavimim.tmp_pumheight = &pumheight
+				\ | let &pumheight = b:yavimim.pumheight_saved
+				\ | let b:yavimim.pumheight_saved = b:yavimim.tmp_pumheight
 	autocmd YaVimIM BufWinEnter <buffer>
 				\ if !exists('b:vimim') && &l:modifiable
 				\ | let &l:iminsert = 0
@@ -99,7 +104,7 @@ function! s:toggle_options()
 		let b:yavimim.iminsert_saved = &l:iminsert
 		let &l:omnifunc='g:yavimim_omnifunc'
 		let &completeopt='menuone'
-		let &pumheight = 10
+		let &pumheight = g:yavimim_pumheight
 	endif
 endfunction
 

@@ -68,7 +68,7 @@ function! yavimim#backend#matches(key, mode)
 			let g:yavimim_only = len(matches) == 1 ? 1 : 0
 			for match in matches
 				let [tip, word] = split(match)
-				if exists('g:yavimim_traditional') && g:yavimim_traditional
+				if g:yavimim_traditional
 					let word = s:s2t(word)
 				endif
 				let kind = tip[0] == '@' ? '[拼]' : ''
@@ -130,7 +130,7 @@ function! s:matches_wbpy(list, range, mode)
 	let length = a:range[1] - a:range[0] + 1
 	let total_nr = s:total_nr(length, a:mode)
 	let page_nr = a:mode == 'insert' ? b:yavimim.page_nr : g:_yavimim_page_nr
-	let num = a:mode == 'insert' ? &pumheight : 5
+	let num = a:mode == 'insert' ? &pumheight : g:yavimim_candidate
 	if page_nr < 1
 		let page_nr = total_nr
 	elseif page_nr > total_nr
@@ -149,7 +149,7 @@ function! s:matches_wbpy(list, range, mode)
 endfunction
 
 function! s:total_nr(length, mode)
-	let num = a:mode == 'insert' ? &pumheight : 5
+	let num = a:mode == 'insert' ? &pumheight : g:yavimim_candidate
 	return float2nr(ceil(a:length / yavimim#util#nr2float(num)))
 endfunction
 
@@ -158,8 +158,8 @@ endfunction
 
 function! s:getlines(im)
 	let cht = ''
-	if exists('g:yavimim_traditional') && g:yavimim_traditional &&
-				\ a:im.id == 'qq' && has_key(a:im.path_store, 'zh_cht')
+	if g:yavimim_traditional && a:im.id == 'qq' &&
+				\ has_key(a:im.path_store, 'zh_cht')
 		let cht = '_cht'
 	endif
 	if !has_key(a:im, 'lines'.cht) && a:im.type != 'cloud'
