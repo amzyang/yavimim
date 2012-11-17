@@ -68,6 +68,9 @@ function! yavimim#backend#matches(key, mode)
 			let g:yavimim_only = len(matches) == 1 ? 1 : 0
 			for match in matches
 				let [tip, word] = split(match)
+				if exists('g:yavimim_traditional') && g:yavimim_traditional
+					let word = s:s2t(word)
+				endif
 				let kind = tip[0] == '@' ? '[拼]' : ''
 				let offset = tip[0] == '@' ? 1 : 0
 				let tip = tip[(len(a:key) + offset) : ]
@@ -155,12 +158,13 @@ endfunction
 
 function! s:getlines(im)
 	let cht = ''
-	if exists('g:yavimim_traditional') && g:yavimim_traditional
+	if exists('g:yavimim_traditional') && g:yavimim_traditional &&
+				\ a:im.id == 'qq' && has_key(a:im.path_store, 'zh_cht')
 		let cht = '_cht'
 	endif
 	if !has_key(a:im, 'lines'.cht) && a:im.type != 'cloud'
 		" @TODO: can we access l:path?
-		let l:path = a:im['path'.cht]
+		let l:path = a:im.path_store['zh'.cht]
 		let lines = readfile(l:path)
 		if a:im.id != 'qq'
 			while lines[0] != '[Data]'
@@ -281,12 +285,11 @@ function! yavimim#backend#setup_backend()
 				\ 'name': '五笔拼音'}
 				\ }
 	for [key, im] in items(s:yavimim.backends)
-		let paths = s:getpaths(im)
-		if join(paths, '') == ''
+		let path_store = s:getpath(im)
+		if empty(keys(path_store))
 			call remove(s:yavimim.backends, key)
 		else
-			let im.path = paths[0]
-			let im.path_cht = paths[1]
+			let im.path_store = path_store
 		endif
 	endfor
 	let user_ims = keys(s:yavimim.backends)
@@ -305,41 +308,57 @@ function! yavimim#backend#setup_backend()
 	let s:yavimim.im = s:yavimim.backends[user_ims[0]]
 endfunction
 
-function! s:getpaths(im)
-	let paths = []
-	for cht in ['', '_cht']
+function! s:getpath(im)
+	let path_store = {}
+	for type in ['', '_cht']
 		let relative = printf('autoload/yavimim/%s/%s%s.txt',
-					\ a:im.type, a:im.id, cht)
+					\ a:im.type, a:im.id, type)
 		let path = split(globpath(&rtp, relative), '\n')
 		if len(path) > 0
 			if len(path) > 1
 				silent call yavimim#util#show_message()
 			endif
-			call add(paths, path[0])
-		else
-			call add(paths, '')
+			let path_store['zh'.type] = path[0]
 		endif
 	endfor
-	return paths
+	return path_store
 endfunction
 
 " 简繁转换
 function! s:s2t(chars)
 	if !exists('s:s2t_lines') || empty(s:s2t_lines)
-		let path = sptit(globpath(&rtp, 'autoload/yavimim/data/gbks2t.tab'),
+		let path = split(globpath(&rtp, 'autoload/yavimim/data/gbks2t.tab'),
 					\ '\n')
 		if len(path) == 0
 			let message = "简繁转换数据库不存在，无法使用该功能！"
 			call yavimim#util#show_message(message)
 			return
 		endif
-		let s:s2t_lines = readfile(path[0])
+		let lines = readfile(path[0])
+		let s:s2t_lines = {}
+		for line in lines
+			let s:s2t_lines[char2nr(line)] = line
+		endfor
 	endif
-	for line in s:s2t_lines
-		let pattern = '^'.a:chars
-		if line =~ pattern
-			return strpart(line, byteidx(line, 1))
-	endfor
+	let cht = ''
+	let idx = 0
+	let len = strlen(substitute(a:chars, ".", "x", "g"))
+	while idx < len
+		let mb_char = strpart(a:chars, byteidx(a:chars, idx),
+					\ byteidx(a:chars, idx+1) - byteidx(a:chars, idx))
+		if !has_key(s:s2t_lines, char2nr(mb_char))
+			let cht .= mb_char
+		else
+			let line = s:s2t_lines[char2nr(mb_char)]
+			let cht .= strpart(line, byteidx(line, 1))
+		endif
+		let idx += 1
+	endwhile
+	return cht
+endfunction
+
+function! s:sort_s2t(line1, line2)
+	return char2nr(a:line2) - char2nr(a:line1)
 endfunction
 
 function! yavimim#backend#getim()
