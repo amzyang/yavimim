@@ -383,10 +383,6 @@ function! s:s2t(chars)
 	return cht
 endfunction
 
-function! s:sort_s2t(line1, line2)
-	return char2nr(a:line2) - char2nr(a:line1)
-endfunction
-
 function! yavimim#backend#getim()
 	" @TODO deepcopy/copy
 	return s:yavimim.backends[g:yavimim_im]
