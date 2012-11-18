@@ -101,7 +101,7 @@ endfunction
 function! s:data_omni(list)
 	let label = 1
 	for item in a:list
-		if v:version == 703 && has('patch713')
+		if (v:version == 703 && has('patch713')) || v:version > 703
 			let item.abbr = printf("%d.%-11S", label % 10, item.word.item.tip)
 		else
 			let item.abbr = printf("%d.%-12s", label % 10, item.word.item.tip)
