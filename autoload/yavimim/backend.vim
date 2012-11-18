@@ -62,12 +62,12 @@ function! yavimim#backend#matches(key)
 			let g:_yavimim_only = len(matches) == 1 ? 1 : 0
 			for match in matches
 				let [tip, word] = split(match)
-				if g:yavimim_traditional
-					let word = s:s2t(word)
-				endif
 				let word = s:encoding(word)
 				if empty(word)
 					continue
+				endif
+				if g:yavimim_traditional
+					let word = s:s2t(word)
 				endif
 				let kind = tip[0] == '@' ? '[拼]' : ''
 				let offset = tip[0] == '@' ? 1 : 0
@@ -363,6 +363,7 @@ function! s:s2t(chars)
 		let lines = readfile(path[0])
 		let s:s2t_lines = {}
 		for line in lines
+			let line = s:encoding(line)
 			let s:s2t_lines[char2nr(line)] = line
 		endfor
 	endif
