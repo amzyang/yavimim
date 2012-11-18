@@ -18,6 +18,5 @@ function! s:init()
 		return
 	endif
 	let g:yavimim_initialized = 1
-	runtime autoload/yavimim/user_config.vim
 	call yavimim#backend#setup_backend()
 endfunction
