@@ -26,7 +26,7 @@ function! s:wbqq_spliter(string)
 endfunction
 
 function! yavimim#backend#has(key)
-	let im = s:yavimim.im
+	let im = yavimim#backend#getim()
 	let lines = s:getlines(im)
 	if im.type == 'wubi'
 		if im.id == 'qq'
@@ -41,7 +41,7 @@ function! yavimim#backend#has(key)
 endfunction
 
 function! yavimim#backend#matches(key)
-	let im = s:yavimim.im
+	let im = yavimim#backend#getim()
 	let lines = s:getlines(im)
 	let words = []
 	let g:_yavimim_pinyin_in_matches = 0
@@ -318,7 +318,7 @@ function! yavimim#backend#setup_backend()
 	endfor
 	let user_ims = keys(s:yavimim.backends)
 	if exists('g:yavimim_imlist')
-		let ims = split(g:yavimim_imlist, ',')
+		let ims = split(g:yavimim_imlist, '\s*,\s*')
 		let _ims = []
 		for imkey in ims
 			if index(user_ims, imkey) >= 0
@@ -329,7 +329,10 @@ function! yavimim#backend#setup_backend()
 			let user_ims = _ims
 		endif
 	endif
-	let s:yavimim.im = s:yavimim.backends[user_ims[0]]
+	if !exists('g:yavimim_im') || index(user_ims, g:yavimim_im) == -1
+		echoerr string(user_ims)
+		let g:yavimim_im = user_ims[0]
+	endif
 endfunction
 
 function! s:getpath(im)
@@ -387,7 +390,7 @@ endfunction
 
 function! yavimim#backend#getim()
 	" @TODO deepcopy/copy
-	return s:yavimim.im
+	return s:yavimim.backends[g:yavimim_im]
 endfunction
 
 function! yavimim#backend#should_auto_commit(...)
