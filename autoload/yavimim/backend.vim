@@ -9,19 +9,10 @@ let g:_yavimim_pinyin_in_matches = 0
 
 function! s:wbqq_spliter(string)
 	" '你好vb' => ['你好', 'vb']
-	let l:first = ''
-	let l:second = ''
-	let l:start = -1
-	let l:index = 0
-	while l:index < len(a:string)
-		let l:char = a:string[l:index]
-		if l:char =~ '[a-z]'
-			let l:second .= l:char
-		else
-			let l:first .= l:char
-		endif
-		let l:index += 1
-	endwhile
+	let pattern = '\l*$'
+	let l:first = substitute(a:string, pattern, '', '')
+	let idx = match(a:string, pattern)
+	let l:second = a:string[idx : ]
 	return [l:first, l:second]
 endfunction
 
