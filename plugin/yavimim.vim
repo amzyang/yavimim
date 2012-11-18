@@ -25,7 +25,7 @@ if !exists('g:yavimim_pumheight')
 	let g:yavimim_pumheight         = 10     " 插入模式下候选词个数 10
 endif
 if !exists('g:yavimim_auto_commit')
-	let g:yavimim_auto_commit       = 1      " 启用自动上档
+	let g:yavimim_auto_commit       = 1      " 启用自动上屏
 endif
 "===============================================================================
 " 主程序

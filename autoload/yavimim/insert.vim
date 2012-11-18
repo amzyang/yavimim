@@ -345,7 +345,7 @@ endfunction
 
 function! s:lmap_letter_wubi(char)
 	" 五笔
-	" 检测我们是否已经输入四个可用字母，此时就可以上档了
+	" 检测我们是否已经输入四个可用字母，此时就可以上屏了
 	let b:yavimim.page_nr = 1
 	call s:fix_cursor_position()
 	let l:len = col('.') - b:yavimim.cursor.column - 1
