@@ -14,9 +14,9 @@ function! yavimim#toggle_cmdline()
 endfunction
 
 function! s:init()
-	if exists('g:yavimim_initialized')
+	if exists('g:_yavimim_initialized')
 		return
 	endif
-	let g:yavimim_initialized = 1
+	let g:_yavimim_initialized = 1
 	call yavimim#backend#setup_backend()
 endfunction
