@@ -25,7 +25,9 @@ archive: ${SOURCE}
 ${PLUGIN}.vmb: ${SOURCE}
 	@vim --cmd 'let g:plugin_name="${PLUGIN}"' -S build.vim -cq!
 	@cp ${PLUGIN}.{vmb,vba}
+	@tar Jcvf ${PLUGIN}.{vba.tar.xz,vba}
+	@tar Jcvf ${PLUGIN}.{vmb.tar.xz,vmb}
 
 .PHONY : clean
 clean:
-	-rm -f ${PLUGIN}.{vmb,vba,tar.xz}
+	-rm -f ${PLUGIN}.{vmb,vba,tar.xz,vba.tar.xz,vmb.tar.xz}
