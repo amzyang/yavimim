@@ -210,7 +210,7 @@ function! s:encoding(line)
 	try
 		let line = iconv(a:line, 'utf-8', &enc)
 		" 移除编码转换失败词组
-		let pattern = '\S\*?\+\l*'
+		let pattern = '\S*?\+\l*'
 		let line = substitute(line, pattern, '', 'g')
 		return line
 	catch /.*/
