@@ -121,6 +121,7 @@ function! s:data_omni_align_kind(list)
 		let max_length = max_length < strlen(item.kind) ?
 					\ strlen(item.kind) : max_length
 	endfor
+	let max_length = max_length < 7 ? 7 : max_length
 	for item in a:list
 		let item.kind = printf(printf("%%%ds", max_length), item.kind)
 	endfor
