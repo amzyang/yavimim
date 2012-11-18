@@ -70,6 +70,10 @@ function! yavimim#backend#matches(key)
 			let matches = s:matches_wbpy(lines, range)
 			let g:_yavimim_only = len(matches) == 1 ? 1 : 0
 			for match in matches
+				let match = s:encoding(match)
+				if empty(match)
+					continue
+				endif
 				let [tip, word] = split(match)
 				if g:yavimim_traditional
 					let word = s:s2t(word)
@@ -212,6 +216,10 @@ function! s:encoding(line)
 		" 移除编码转换失败词组
 		let pattern = '\S*?\+\l*'
 		let line = substitute(line, pattern, '', 'g')
+		let pattern = '^@\?\l*\s*\l*\s*$'
+		if line =~ pattern
+			return ''
+		endif
 		return line
 	catch /.*/
 		echoerr "Maybe iconv feature is missing.
