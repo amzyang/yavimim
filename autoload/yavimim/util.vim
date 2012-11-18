@@ -9,7 +9,7 @@ function! yavimim#util#show_message(...)
 	endif
 
 	for l:message in a:000
-		echo l:message
+		echomsg l:message
 		unlet l:message
 	endfor
 endfunction

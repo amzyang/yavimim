@@ -358,7 +358,7 @@ function! s:s2t(chars)
 		if len(path) == 0
 			let message = "简繁转换数据库不存在，无法使用该功能！"
 			call yavimim#util#show_message(message)
-			return
+			return chars
 		endif
 		let lines = readfile(path[0])
 		let s:s2t_lines = {}
