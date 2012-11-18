@@ -362,9 +362,16 @@ function! s:s2t(chars)
 		endif
 		let lines = readfile(path[0])
 		let s:s2t_lines = {}
+		let idx = 0
+		let message = "加载简繁体数据库，请稍等！"
 		for line in lines
+			if idx % 2400 == 0
+				 let message .= '.'
+				 call yavimim#util#show_message(message)
+			endif
 			let line = s:encoding(line)
 			let s:s2t_lines[char2nr(line)] = line
+			let idx += 1
 		endfor
 	endif
 	let cht = ''
