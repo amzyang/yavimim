@@ -208,11 +208,11 @@ function! s:encoding(line)
 		return a:line
 	endif
 	try
-		let a:line = iconv(a:line, 'utf-8', &enc)
+		let line = iconv(a:line, 'utf-8', &enc)
 		" 移除编码转换失败词组
 		let pattern = '\S\*?\+\l*'
-		let a:line = substitute(a:line, pattern, '', 'g')
-		return a:line
+		let line = substitute(line, pattern, '', 'g')
+		return line
 	catch /.*/
 		echoerr "Maybe iconv feature is missing.
 					\ See http://www.vim.org/download.php for more details."
