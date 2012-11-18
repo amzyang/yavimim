@@ -331,7 +331,6 @@ function! yavimim#backend#setup_backend()
 		endif
 	endif
 	if !exists('g:yavimim_im') || index(user_ims, g:yavimim_im) == -1
-		echoerr string(user_ims)
 		let g:yavimim_im = user_ims[0]
 	endif
 endfunction
