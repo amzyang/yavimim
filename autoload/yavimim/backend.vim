@@ -175,9 +175,6 @@ function! s:total_nr(length)
 	return float2nr(ceil(a:length / yavimim#util#nr2float(num)))
 endfunction
 
-function! yavimim#backend#title()
-endfunction
-
 function! s:getlines(im)
 	let cht = ''
 	if g:yavimim_traditional && a:im.id == 'qq' &&
@@ -306,7 +303,7 @@ function! yavimim#backend#setup_backend()
 	let s:yavimim.backends = {
 				\ 'wbqq': {'id': 'qq',
 					\ 'type': 'wubi',
-					\ 'name': 'QQ云五笔'},
+					\ 'name': 'QQ五笔'},
 				\ 'wbpy': {'id':'wbpy',
 				\ 'type': 'wubi',
 				\ 'name': '五笔拼音'}
