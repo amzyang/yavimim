@@ -363,11 +363,14 @@ function! s:s2t(chars)
 		let lines = readfile(path[0])
 		let s:s2t_lines = {}
 		let idx = 0
-		let message = "加载简繁体数据库，请稍等！"
+		let tip = "加载简繁体数据库中"
+		let percent = len(lines) / 25
 		for line in lines
-			if idx % 2400 == 0
-				 let message .= '.'
-				 call yavimim#util#show_message(message)
+			if idx % percent == 0
+				 let finished = idx / percent + 1
+				 let left = 24 - finished
+				 let progress = repeat('=', finished) . repeat('-', left) . '>'
+				 call yavimim#util#show_message(tip.progress)
 			endif
 			let line = s:encoding(line)
 			let s:s2t_lines[char2nr(line)] = line
