@@ -106,9 +106,10 @@ endfunction
 function! s:data_omni(list)
 	let label = 1
 	for item in a:list
-		let item.abbr = printf("%d.%s%s", label % 10, item.word, item.tip)
-		if strlen(item.abbr) <= 14
-			let item.abbr = printf("%-14s", item.abbr)
+		if v:version == 703 && has('patch713')
+			let item.abbr = printf("%d.%-11S", label % 10, item.word.item.tip)
+		else
+			let item.abbr = printf("%d.%-12s", label % 10, item.word.item.tip)
 		endif
 		let item.dup = 1
 		let label += 1
@@ -116,12 +117,11 @@ function! s:data_omni(list)
 endfunction
 
 function! s:data_omni_align_kind(list)
-	let max_length = 0
+	let max_length = 7
 	for item in a:list
 		let max_length = max_length < strlen(item.kind) ?
 					\ strlen(item.kind) : max_length
 	endfor
-	let max_length = max_length < 7 ? 7 : max_length
 	for item in a:list
 		let item.kind = printf(printf("%%%ds", max_length), item.kind)
 	endfor
