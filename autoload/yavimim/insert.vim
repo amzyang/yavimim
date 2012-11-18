@@ -62,12 +62,13 @@ function! s:reset_start_insert()
 	call s:set_cursor_position()
 endfunction
 
-fun! s:session_start_running()
+function! s:session_start_running()
 	let b:yavimim.state = 1
-endf
-fun! s:session_end()
+endfunction
+
+function! s:session_end()
 	let b:yavimim.state = 0
-endf
+endfunction
 
 function! s:init_buffer()
 	let b:yavimim = {}
@@ -322,7 +323,7 @@ function! yavimim#insert#enter()
 	endif
 	let key .= '\<C-R>=g:do_after_cancel()\<CR>'
 	silent execute printf('return "%s"', key)
-endf
+endfunction
 
 function! yavimim#insert#number(number)
 	let l:number = a:number
