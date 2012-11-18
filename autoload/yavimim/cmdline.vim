@@ -64,7 +64,7 @@ function! yavimim#cmdline#letter(char)
 			let s:keys .= char
 			let s:match_lists = yavimim#backend#matches(s:keys)
 			if len(s:match_lists) &&
-						\ yavimim#backend#should_auto_commit(len(s:keys))
+						\ yavimim#backend#should_auto_commit(strlen(s:keys))
 				return s:do_commit()
 			endif
 			let g:_yavimim_page_nr = 1
@@ -81,7 +81,7 @@ function! yavimim#cmdline#letter(char)
 		" backspace/ctrl-h
 		elseif nr == "\<BS>" || nr == 8
 			if !empty(s:keys)
-				let len = len(s:keys)
+				let len = strlen(s:keys)
 				if len == 1
 					let s:keys = ''
 					return s:do_cancel_commit()

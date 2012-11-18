@@ -331,7 +331,10 @@ function! yavimim#insert#number(number)
 		let l:number = 10
 	endif
 	if b:yavimim.state == 1
-		let l:key = repeat('\<Down>', l:number) . '\<C-Y>'
+		let minus = l:number - b:yavimim.pmenu
+		let step = max([minus, 0 - minus])
+		let direction = minus > 0 ? '\<Down>' : '\<Up>'
+		let l:key = repeat(direction, step) . '\<C-Y>'
 		silent execute printf('return "%s%s"', l:key,
 					\ '\<C-R>=g:do_after_commit()\<CR>')
 	else
@@ -406,7 +409,7 @@ function! g:yavimim_omnifunc(findstart, base)
 		call s:fix_cursor_position()
 		let base = getline(b:yavimim.cursor.line)
 					\[b:yavimim.cursor.column:col('.') - 2]
-		if !len(base)
+		if !strlen(base)
 			return -3
 		endif
 		let b:yavimim.base = base

@@ -61,19 +61,19 @@ function! yavimim#backend#matches(key)
 			let matches = s:matches_wbpy(lines, range)
 			let g:_yavimim_only = len(matches) == 1 ? 1 : 0
 			for match in matches
-				let match = s:encoding(match)
-				if empty(match)
-					continue
-				endif
 				let [tip, word] = split(match)
 				if g:yavimim_traditional
 					let word = s:s2t(word)
+				endif
+				let word = s:encoding(word)
+				if empty(word)
+					continue
 				endif
 				let kind = tip[0] == '@' ? '[拼]' : ''
 				let offset = tip[0] == '@' ? 1 : 0
 				let g:_yavimim_pinyin_in_matches = offset ||
 							\ g:_yavimim_pinyin_in_matches
-				let tip = tip[(len(a:key) + offset) : ]
+				let tip = tip[(strlen(a:key) + offset) : ]
 				call add(words, {'word': word, 'tip': tip, 'kind': kind})
 			endfor
 			let total_nr = s:total_nr(length)
@@ -259,7 +259,7 @@ function! s:find_sorted_match(list, key, low, high)
 			return mid
 		endif
 		let start = line[0] == '@' ? 1 : 0
-		let cmp = line[start : len(a:key)]
+		let cmp = line[start : strlen(a:key)]
 		if cmp < a:key
 			let low = mid + 1
 		elseif cmp > a:key
