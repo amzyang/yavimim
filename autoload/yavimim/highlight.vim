@@ -7,10 +7,11 @@ endfunction
 
 function! yavimim#highlight#highlight(lnum, start, end)
 	let pattern = printf("\\%%%sl\\%%>%dc.*\\%%<%dc", a:lnum, a:start, a:end)
-	if exists('b:yavimim.highlight_id')
-		call matchdelete(b:yavimim.highlight_id)
+	if exists('w:yavimim_highlight_id')
+		call matchdelete(w:yavimim_highlight_id)
+		unlet w:yavimim_highlight_id
 	endif
-	let b:yavimim.highlight_id = matchadd('YaVimIM', pattern)
+	let w:yavimim_highlight_id = matchadd('YaVimIM', pattern)
 	return ''
 endfunction
 

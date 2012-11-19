@@ -10,9 +10,9 @@ function! yavimim#insert#toggle(...)
 	if !&l:modifiable | return '' | endif
 	if !exists('b:yavimim') | call s:init_buffer() | endif
 	call s:toggle_options()
-	if exists('b:yavimim.highlight_id')
-		call matchdelete(b:yavimim.highlight_id)
-		unlet b:yavimim.highlight_id
+	if exists('w:yavimim_highlight_id')
+		call matchdelete(w:yavimim_highlight_id)
+		unlet w:yavimim_highlight_id
 	endif
 	call s:set_cursor_position()
 	if &l:iminsert != 1
