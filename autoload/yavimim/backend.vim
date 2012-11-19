@@ -21,10 +21,11 @@ function! yavimim#backend#has(key)
 	let lines = s:getlines(im)
 	if im.type == 'wubi'
 		if im.id == 'qq'
-			let index = s:find_sorted_idx(lines, a:key)
+			let Cmp_func = function('s:cmp_wbqq')
 		else
-			let index = s:find_sorted_match(lines, a:key, 0, len(lines) - 1)
+			let Cmp_func = function('s:cmp_wbpy')
 		endif
+			let index = s:sorted_idx(lines, a:key, 0, len(lines) - 1, Cmp_func)
 	elseif im.type == 'pinyin'
 	else
 	endif
@@ -38,7 +39,8 @@ function! yavimim#backend#matches(key)
 	let g:_yavimim_pinyin_in_matches = 0
 	if im.type == 'wubi'
 		if im.id == 'qq'
-			let index = s:find_sorted_idx(lines, a:key)
+			let Cmp_func = function('s:cmp_wbqq')
+			let index = s:sorted_idx(lines, a:key, 0, len(lines) - 1, Cmp_func)
 			if index == -1
 				return []
 			endif
@@ -53,7 +55,8 @@ function! yavimim#backend#matches(key)
 			endfor
 			let total_nr = s:total_nr(len(parts))
 		else
-			let range = s:sorted_matches_range(lines, a:key)
+			let Cmp_func = function('s:cmp_wbpy')
+			let range = s:sorted_matches_range(lines, a:key, Cmp_func)
 			if range == [-1, -1]
 				return []
 			endif
@@ -219,35 +222,10 @@ function! s:encoding(line)
 	endtry
 endfunction
 
-function! s:find_sorted_idx(list, key)
-	" a:list: ['a', 'aa', 'ab', ...]
-	" a:key:   'def'
-	let low = 0
-	let high = len(a:list) - 1
-	let mid = (low + high) / 2
-	let l:key = get(split(a:list[mid], '\s\+'), 0, '')
-
-	while low <= high
-		if l:key < a:key
-			let low = mid + 1
-		elseif l:key > a:key
-			let high = mid - 1
-		else
-			return mid
-		endif
-		let mid = (low + high) / 2
-		let l:key = get(split(a:list[mid], '\s\+'), 0, '')
-	endwhile
-	return -1
-endfunction
-
-function! s:find_sorted_match(list, key, low, high)
-	" a:list: ['a 工', 'a 戈', '@a 啊', ...]
-	" a:key:   'def'
+function! s:sorted_idx(list, key, low, high, cmp)
 	if a:high >= len(a:list) || a:low > a:high
 		return -1
 	endif
-	let pattern = '^@\='.a:key
 	let low = a:low
 	let high = a:high
 	let mid = (low + high) / 2
@@ -255,14 +233,12 @@ function! s:find_sorted_match(list, key, low, high)
 
 	while low <= high && low >= a:low && high <= a:high &&
 				\ mid >= a:low && mid <= a:high
-		if line =~ pattern
+		let ret = a:cmp(line, a:key)
+		if ret == 0
 			return mid
-		endif
-		let start = line[0] == '@' ? 1 : 0
-		let cmp = line[start : strlen(a:key)]
-		if cmp < a:key
+		elseif ret == -1
 			let low = mid + 1
-		elseif cmp > a:key
+		else
 			let high = mid - 1
 		endif
 		let mid = (low + high) / 2
@@ -271,29 +247,42 @@ function! s:find_sorted_match(list, key, low, high)
 	return -1
 endfunction
 
-function! s:sorted_matches_range(list, key)
+function! s:cmp_wbqq(line, key)
+	let l:key = get(split(a:line, '\s\+'), 0, '')
+	return l:key == a:key ? 0 : l:key < a:key ? -1 : 1
+endfunction
+
+" @TODO: can this be used to all fcitx database?
+function! s:cmp_wbpy(line, key)
+	let offset = a:line[0] == '@' ? 1 : 0
+	let l:key = a:line[offset : strlen(a:key) + offset - 1]
+	return l:key == a:key ? 0 : l:key < a:key ? -1 : 1
+endfunction
+
+function! s:sorted_matches_range(list, key, Cmp_func)
 	let high = len(a:list) - 1
-	let sep = s:find_sorted_match(a:list, a:key, 0, high)
+	let sep = s:sorted_idx(a:list, a:key, 0, high, a:Cmp_func)
 	if sep == -1
 		return [-1, -1]
 	endif
 
-	let lower = s:find_sorted_match(a:list, a:key, 0, sep - 1)
+	let lower = s:sorted_idx(a:list, a:key, 0, sep - 1, a:Cmp_func)
 	if lower == -1
 		let lower_saver = sep
 	else
 		while lower != -1
 			let lower_saver = lower
-			let lower = s:find_sorted_match(a:list, a:key, 0, lower - 1)
+			let lower = s:sorted_idx(a:list, a:key, 0, lower - 1, a:Cmp_func)
 		endwhile
 	endif
-	let greater = s:find_sorted_match(a:list, a:key, sep + 1, high)
+	let greater = s:sorted_idx(a:list, a:key, sep + 1, high, a:Cmp_func)
 	if greater == -1
 		let greater_saver = sep
 	else
 		while greater != -1
 			let greater_saver = greater
-			let greater = s:find_sorted_match(a:list, a:key, greater + 1, high)
+			let greater = s:sorted_idx(a:list, a:key, greater + 1,
+						\ high, a:Cmp_func)
 		endwhile
 	endif
 	return [lower_saver, greater_saver]
