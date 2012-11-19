@@ -221,7 +221,7 @@ function! yavimim#insert#en()
 		let key = '\<C-R>=g:do_after_cancel()\<CR>'
 	endif
 	let key .= "\<C-R>=yavimim#insert#en_pre()\<CR>"
-	let key .= "\<C-R>=input('>> ')\<CR>"
+	let key .= "\<C-R>=input('>>')\<CR>"
 	let key .= "\<C-R>=yavimim#insert#en_post()\<CR>"
 	silent execute printf('return "%s"', key)
 endfunction

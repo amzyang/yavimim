@@ -30,7 +30,7 @@ endfunction
 
 function! yavimim#cmdline#en()
 	echohl Comment
-	let string = input(">> ")
+	let string = input(">>")
 	echohl None
 	return string
 endfunction
