@@ -53,11 +53,7 @@ function! yavimim#cmdline#letter(char)
 	call s:echo()
 	while 1
 		let nr = getchar()
-		if type(nr) == type(0)
-			let char = nr2char(nr)
-		else
-			let char = ''
-		endif
+		let char = type(nr) == type(0) ? nr2char(nr) : ''
 		
 		" lowercase character
 		if char =~ '\l'
