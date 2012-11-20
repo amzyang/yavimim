@@ -146,8 +146,10 @@ function! yavimim#vk#vk()
 		elseif stridx(s:keyboard, char) >= 0 ||
 					\ stridx(s:keyboard_shift, char) >= 0
 			let val = get(kb, char, '')
-			let s:keys .= val
-			call s:display_vkb(kb)
+			if !empty(val)
+				let s:keys .= val
+				call s:display_vkb(kb)
+			endif
 		elseif nr == "\<ESC>"
 			let &cmdheight = cmdheight_saved
 			redraw
