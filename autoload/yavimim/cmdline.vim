@@ -26,6 +26,7 @@ function! s:mappings()
 	call s:lmap_letters()
 	call s:lmap_punctuations()
 	lnoremap <expr> ;; yavimim#cmdline#en() 
+	lnoremap <expr> ]] yavimim#vk#vk()
 endfunction
 
 function! yavimim#cmdline#en()

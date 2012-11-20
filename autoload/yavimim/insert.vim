@@ -200,6 +200,7 @@ function! s:mappings()
 				" \ "<C-R>=g:do_after_cancel()<CR><C-U>"
 	call s:lmap_punctuations()
 	silent execute "lnoremap" s:map_args ";;" "<C-R>=yavimim#insert#en()<CR>"
+	silent execute "lnoremap" s:map_args "]]" "<C-R>=yavimim#vk#vk()<CR>"
 	call s:lmap_numbers()
 	call s:lmap_letters()
 endfunction
