@@ -156,13 +156,6 @@ function! yavimim#vk#vk()
 			let s:keys = mb_len <= 1 ? '' :
 						\ s:keys[0 : byteidx(s:keys, mb_len - 1) - 1]
 			call s:display_vkb(kb)
-		elseif stridx(s:keyboard, char) >= 0 ||
-					\ stridx(s:keyboard_shift, char) >= 0
-			let val = get(kb, char, '')
-			if !empty(val)
-				let s:keys .= val
-				call s:display_vkb(kb)
-			endif
 		elseif nr == "\<ESC>"
 			let &cmdheight = cmdheight_saved
 			redraw
@@ -176,15 +169,22 @@ function! yavimim#vk#vk()
 			let s:keys = ''
 			call s:display_vkb(kb)
 		" Ctrl-N
-		elseif nr == 14
+		elseif nr == 14 || nr == "\<Down>"
 			let kb = s:iter_vkb(1)
 			call s:display_vkb(kb)
 		" Ctrl-P
-		elseif nr == 16
+		elseif nr == 16 || nr == "\<Up>"
 			let kb = s:iter_vkb(-1)
 			call s:display_vkb(kb)
 		elseif nr == "\<C-l>"
 			call s:display_vkb(kb)
+		elseif stridx(s:keyboard, char) >= 0 ||
+					\ stridx(s:keyboard_shift, char) >= 0
+			let val = get(kb, char, '')
+			if !empty(val)
+				let s:keys .= val
+				call s:display_vkb(kb)
+			endif
 		else
 			let &cmdheight = cmdheight_saved
 			redraw
