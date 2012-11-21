@@ -70,6 +70,20 @@ function! s:display_vkb(kb)
 	let max_len = s:max_row_length(layout_keys)
 	echohl Comment | echo ">>" | echohl None
 	echon s:keys
+	let title_offset = repeat(' ', (max_len * 8 - strlen(join(s:sections, ' '))) / 2)
+	let idx = 0
+	echon "\n".title_offset
+	while idx < len(s:sections)
+		if (idx == s:vk_idx)
+			echohl Title | echon s:sections[idx] | echohl None
+		else
+			echohl Comment | echon s:sections[idx] | echohl None
+		endif
+		if (idx < len(s:sections) - 1)
+			echon seperator
+		endif
+		let idx += 1
+	endwhile
 	while outeridx < len(layout_keys)
 		let keys = layout_keys[outeridx]
 		let offset = repeat(' ', (max_len - len(keys)) * 4)
@@ -109,9 +123,7 @@ function! s:display_vkb(kb)
 		echohl Comment | echon "\n".offset.end | echohl None
 		let outeridx += 1
 	endwhile
-	let title = (s:vk_idx + 1) . "-" . s:sections[s:vk_idx]
-	let title_offset = repeat(' ', (max_len * 8 - strlen(title)) / 2)
-	echohl Title | echon "\n".title_offset.title | echohl None
+	echon "\r"
 endfunction
 
 function! s:max_row_length(list)
