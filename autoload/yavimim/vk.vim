@@ -1,23 +1,25 @@
 " vim: set noexpandtab nolist tabstop=4 shiftwidth=4:
 scriptencoding utf-8
+
+let g:yavimim_vkbl = 'pc103'
+
 let s:vk = {}
 let s:keyboard = "`1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./"
 let s:keyboard_shift = '~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:"|ZXCVBNM<>?'
 let s:vk_idx = 0
 let s:sections = []
-let g:yavimim_vkbl = 'pc103'
-let s:vkbl = {'pc103': [
+let s:vkbl = {'pc103':
 			\ ['`1234567890-=', 'qwertyuiop[]\', 'asdfghjkl;''', 'zxcvbnm,./'],
-			\ ['~!@#$%^&*()_+', 'QWERTYUIOP{}|', 'ASDFGHJKL:"', 'ZXCVBNM<>?']
-		\ ],
-		\ 'pc103_big_enter': [
+		\ 'pc103_big_enter':
 			\ ['`1234567890-=\', 'qwertyuiop[]', 'asdfghjkl;''', 'zxcvbnm,./'],
-			\ ['~!@#$%^&*()_+|', 'QWERTYUIOP{}', 'ASDFGHJKL:"', 'ZXCVBNM<>?']
-		\ ],
-		\ 'hhkb': [
-			\ ['1234567890-=\`', 'qwertyuiop[]', 'asdfghjkl;''', 'zxcvbnm,./'],
-			\ ['!@#$%^&*()_+|~', 'QWERTYUIOP{}', 'ASDFGHJKL:"', 'ZXCVBNM<>?']
-		\ ]}
+		\ 'hhkb':
+			\ ['1234567890-=\`', 'qwertyuiop[]', 'asdfghjkl;''', 'zxcvbnm,./']}
+
+function! s:char_shift_mod(char)
+	let idx = stridx(s:keyboard, a:char)
+	return s:keyboard_shift[idx]
+endfunction
+
 function! s:init()
 	let path_list = split(globpath(&rtp, "autoload/yavimim/data/vk.conf"), '\n')
 	if empty(path_list)
@@ -41,8 +43,7 @@ function! s:init()
 		let key = line[0:0]
 		let val = get(split(line[2:]), 0, '')
 		let val_shift = get(split(line[2:]), 1, '')
-		let idx = stridx(s:keyboard, key)
-		let key_shift = s:keyboard_shift[idx]
+		let key_shift = s:char_shift_mod(key)
 		if !has_key(s:vk, section)
 			let s:vk[section] = {}
 		endif
@@ -65,7 +66,7 @@ function! s:display_vkb(kb)
 	let seperator = ' '
 
 	let outeridx = 0
-	let [layout_keys, layout_keys_shift] = s:vkbl[g:yavimim_vkbl]
+	let layout_keys = s:vkbl[g:yavimim_vkbl]
 	let max_len = s:max_row_length(layout_keys)
 	echohl Comment | echo ">>" | echohl None
 	echon s:keys
@@ -74,14 +75,13 @@ function! s:display_vkb(kb)
 		let offset = repeat(' ', (max_len - len(keys)) * 4)
 		let start = repeat(topcover . seperator, strlen(keys))
 		echohl Comment | echon "\n".offset.start | echohl None
-		let keys_shift = layout_keys_shift[outeridx]
-
 		let idx = 0
 		echon "\n".offset
 		while idx < len(keys)
-			let shift = has_key(a:kb, keys_shift[idx]) ?
-						\ a:kb[keys_shift[idx]] : ''
-			let origin = has_key(a:kb, keys[idx]) ? a:kb[keys[idx]] : ''
+			let key = keys[idx]
+			let key_shift = s:char_shift_mod(key)
+			let shift = has_key(a:kb, key_shift) ?  a:kb[key_shift] : ''
+			let origin = has_key(a:kb, key) ? a:kb[key] : ''
 			echohl Comment | echon vertbar | echohl None
 			let spaces = repeat(' ', 5 - strdisplaywidth(origin.shift))
 			echohl Normal
@@ -92,14 +92,15 @@ function! s:display_vkb(kb)
 		let idx = 0
 		echon "\n".offset
 		while idx < len(keys)
-			let shift = has_key(a:kb, keys_shift[idx]) ?
-						\ a:kb[keys_shift[idx]] : ''
-			let origin = has_key(a:kb, keys[idx]) ? a:kb[keys[idx]] : ''
+			let key = keys[idx]
+			let key_shift = s:char_shift_mod(key)
+			let shift = has_key(a:kb, key_shift) ?  a:kb[key_shift] : ''
+			let origin = has_key(a:kb, key) ? a:kb[key] : ''
 			echohl Comment | echon vertbar | echohl None
 			if empty(shift) && empty(origin)
-				echohl Comment | echon printf("  %s  ", keys[idx]) | echohl None
+				echohl Comment | echon printf("  %s  ", key) | echohl None
 			else
-				echohl Keyword | echon printf("  %s  ", keys[idx]) | echohl None
+				echohl Keyword | echon printf("  %s  ", key) | echohl None
 			endif
 			echohl Comment | echon vertbar.seperator | echohl None
 			let idx +=1
