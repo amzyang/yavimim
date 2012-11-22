@@ -19,4 +19,5 @@ function! s:init()
 	endif
 	let g:_yavimim_initialized = 1
 	call yavimim#backend#setup_backend()
+	call yavimim#highlight#init_color()
 endfunction

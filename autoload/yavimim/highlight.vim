@@ -15,9 +15,12 @@ function! yavimim#highlight#highlight(lnum, start, end)
 	return ''
 endfunction
 
-" highlight lCursor
-" use matchadd or syntax?
-" conceal???
-highlight  default lCursorIM guifg=NONE guibg=green gui=NONE
-highlight! link lCursor lCursorIM
-highlight! link YaVimIM Visual
+
+function! yavimim#highlight#init_color()
+	" highlight lCursor
+	" use matchadd or syntax?
+	" conceal???
+	highlight  default lCursorIM guifg=NONE guibg=green gui=NONE
+	highlight! link lCursor lCursorIM
+	highlight! link YaVimIM Visual
+endfunction

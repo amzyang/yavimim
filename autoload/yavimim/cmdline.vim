@@ -3,7 +3,6 @@ scriptencoding utf-8
 
 let s:map_args = ''
 let g:_yavimim_page_nr = 1
-highlight! link YaVimIM Visual
 
 function! yavimim#cmdline#toggle()
 	let s:cmdpos = getcmdpos() - 1
