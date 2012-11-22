@@ -202,7 +202,7 @@ function! s:mappings()
 				" \ "<C-R>=g:do_after_cancel()<CR><C-U>"
 	call s:lmap_punctuations()
 	silent execute "lnoremap" s:map_args ";;" "<C-R>=yavimim#insert#en()<CR>"
-	silent execute "lnoremap" s:map_args "]]" "<C-R>=yavimim#vk#vk()<CR>"
+	silent execute "lnoremap" s:map_args "]]" "<C-R>=yavimim#insert#vk()<CR>"
 	call s:lmap_numbers()
 	call s:lmap_letters()
 endfunction
@@ -226,6 +226,16 @@ function! yavimim#insert#en()
 	let key .= "\<C-R>=yavimim#insert#en_pre()\<CR>"
 	let key .= "\<C-R>=input('>>')\<CR>"
 	let key .= "\<C-R>=yavimim#insert#en_post()\<CR>"
+	silent execute printf('return "%s"', key)
+endfunction
+
+function! yavimim#insert#vk()
+	if pumvisible()
+		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
+	else
+		let key = '\<C-R>=g:do_after_cancel()\<CR>'
+	endif
+	let key .= "\<C-R>=yavimim#vk#vk()\<CR>"
 	silent execute printf('return "%s"', key)
 endfunction
 
