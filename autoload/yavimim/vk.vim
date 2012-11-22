@@ -167,12 +167,18 @@ function! yavimim#vk#vk()
 			let s:keys = ''
 			call s:display_vkb(kb)
 		" Ctrl-N
-		elseif nr == 14 || nr == "\<Down>"
+		elseif nr == 14 || nr == "\<Down>" || nr == "\<Right>"
 			let kb = s:iter_vkb(1)
 			call s:display_vkb(kb)
 		" Ctrl-P
-		elseif nr == 16 || nr == "\<Up>"
+		elseif nr == 16 || nr == "\<Up>" || nr == "\<Left>"
 			let kb = s:iter_vkb(-1)
+			call s:display_vkb(kb)
+		elseif nr == "\<Home>"
+			let kb = s:iter_vkb(0 - s:vk_idx)
+			call s:display_vkb(kb)
+		elseif nr == "\<End>"
+			let kb = s:iter_vkb(len(s:vk) - s:vk_idx - 1)
 			call s:display_vkb(kb)
 		elseif nr == "\<C-l>"
 			call s:display_vkb(kb)
