@@ -38,8 +38,8 @@ endfunction
 function! s:lmap_letters()
 	for number in range(char2nr('a'), char2nr('z'))
 		let char = nr2char(number)
-		silent execute "lnoremap <silent>" s:map_args char
-					\ printf("<C-R>=yavimim#cmdline#letter('%s')<CR>", char)
+		silent execute "lnoremap <expr>" s:map_args char
+					\ printf("yavimim#cmdline#letter('%s')", char)
 	endfor
 endfunction
 
@@ -57,6 +57,11 @@ function! yavimim#cmdline#letter(char)
 		
 		" lowercase character
 		if char =~ '\l'
+			let s:match_lists = yavimim#backend#matches(s:keys)
+			if strlen(s:keys) == 4 && !g:_yavimim_pinyin_in_matches &&
+						\ len(s:match_lists)
+				return s:do_commit()."\<C-R>=".maparg(char, 'l')."\<CR>"
+			endif
 			let s:keys .= char
 			let s:match_lists = yavimim#backend#matches(s:keys)
 			if len(s:match_lists) &&
