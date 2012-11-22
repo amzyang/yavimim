@@ -21,45 +21,75 @@ function! yavimim#backend#has(key)
 	let lines = s:getlines(im)
 	if im.type == 'wubi'
 		if im.id == 'qq'
-			let index = s:find_sorted_idx(lines, a:key)
+			let func = 's:cmp'
 		else
-			let index = s:find_sorted_match(lines, a:key, 0, len(lines) - 1)
+			let func = 's:cmp_wbpy'
 		endif
+			let index = s:sorted_idx(lines, a:key, 0, len(lines) - 1, func)
 	elseif im.type == 'pinyin'
 	else
 	endif
-	return index == -1 ? 0 : 1
+
+	" check user
+	let func = 's:cmp_wbpy'
+	let user_lines = s:get_user_lines()
+	let user_index = s:sorted_idx(user_lines, a:key,
+				\ 0, len(user_lines) - 1, func)
+	return index >= 0 || user_index >= 0
 endfunction
 
 function! yavimim#backend#matches(key)
 	let im = yavimim#backend#getim()
 	let lines = s:getlines(im)
+	let has_user_db = s:enabled_user()
+	let range_hub = []
+	let matches_hub = []
+	let lines_hub = []
+	let lines_range_hub = []
+	let user_lines = s:get_user_lines()
+	let user_range = s:sorted_matches_range(user_lines, a:key, 's:cmp_wbpy')
+	call add(range_hub, user_range)
+	call add(lines_hub, user_lines)
+	call add(lines_range_hub, [user_lines, user_range])
 	let words = []
 	let g:_yavimim_pinyin_in_matches = 0
 	if im.type == 'wubi'
 		if im.id == 'qq'
-			let index = s:find_sorted_idx(lines, a:key)
-			if index == -1
+			let index = s:sorted_idx(lines, a:key, 0,
+						\ len(lines) - 1, 's:cmp')
+			if index == -1 && user_range == [-1, -1]
 				return []
 			endif
-			let line = s:encoding(lines[index])
-			let parts = split(line, '\s\+')
-			call remove(parts, 0)
-			let matches = s:matches(parts)
-			let g:_yavimim_only = len(matches) == 1 ? 1 : 0
+			if index == -1
+				let parts = []
+				let range = [-1, -1]
+			else
+				let line = s:encoding(lines[index])
+				let parts = split(line, '\s\+')
+				call remove(parts, 0)
+				let range = [0, len(parts) - 1]
+			endif
+			call add(lines_range_hub, [parts, range])
+			call add(range_hub, range)
+			call add(lines_hub, parts)
+			let [user_matches, matches] = s:matches(lines_range_hub)
+			let g:_yavimim_only = len(user_matches) + len(matches) == 1 ? 1 : 0
+			let words = s:format_user(user_matches, a:key)
 			for match in matches
 				let [word, tip] = s:wbqq_spliter(match)
 				call add(words, {'word': word, 'tip': tip, 'kind': ''})
 			endfor
-			let total_nr = s:total_nr(len(parts))
 		else
-			let range = s:sorted_matches_range(lines, a:key)
-			if range == [-1, -1]
+			let range = s:sorted_matches_range(lines, a:key, 's:cmp_wbpy')
+			if range == [-1, -1] && user_range == [-1, -1]
 				return []
 			endif
-			let length = range[1] - range[0] + 1
-			let matches = s:matches_wbpy(lines, range)
-			let g:_yavimim_only = len(matches) == 1 ? 1 : 0
+			call add(lines_range_hub, [lines, range])
+			call add(range_hub, range)
+			call add(lines_hub, lines)
+			let [user_matches, matches] = s:matches(lines_range_hub)
+			let g:_yavimim_only = len(user_matches) + len(matches) == 1 ? 1 : 0
+			let words = s:format_user(user_matches, a:key)
 			for match in matches
 				let [tip, word] = split(match)
 				let word = s:encoding(word)
@@ -76,10 +106,11 @@ function! yavimim#backend#matches(key)
 				let tip = tip[(strlen(a:key) + offset) : ]
 				call add(words, {'word': word, 'tip': tip, 'kind': kind})
 			endfor
-			let total_nr = s:total_nr(length)
 		endif
 	else
 	endif
+	let total_nr = s:total_nr(s:get_len_range_hub(range_hub))
+
 	let mode = yavimim#util#getmode()
 	if mode == 'insert'
 		call s:data_omni(words)
@@ -122,30 +153,21 @@ function! s:data_omni_align_kind(list)
 	endfor
 endfunction
 
-function! s:matches(list)
-		let total_nr = s:total_nr(len(a:list))
-		let mode = yavimim#util#getmode()
-		let page_nr = mode == 'insert' ?
-					\ b:yavimim.page_nr : g:_yavimim_page_nr
-		let num = mode == 'insert' ? &pumheight : g:yavimim_candidate
-		if page_nr < 1
-			let page_nr = total_nr
-		elseif page_nr > total_nr
-			let page_nr = 1
+function! s:matches(...)
+	"s:matches([[list1, range1], [list2, range2], [list3, range3][,...]])
+	if a:0 == 0
+		return []
+	endif
+	" get total item count
+	let total_cnt = 0
+	for data in a:1
+		let range = data[1]
+		if range == [-1, -1]
+			continue
 		endif
-		if mode == 'insert'
-			let b:yavimim.page_nr = page_nr
-		else
-			let g:_yavimim_page_nr = page_nr
-		endif
-		let one = (page_nr - 1) * num
-		let two = one + num - 1
-		return a:list[one : two]
-endfunction
-
-function! s:matches_wbpy(list, range)
-	let length = a:range[1] - a:range[0] + 1
-	let total_nr = s:total_nr(length)
+		let total_cnt += range[1] - range[0] + 1
+	endfor
+	let total_nr = s:total_nr(total_cnt)
 	let mode = yavimim#util#getmode()
 	let page_nr = mode == 'insert' ? b:yavimim.page_nr : g:_yavimim_page_nr
 	let num = mode == 'insert' ? &pumheight : g:yavimim_candidate
@@ -159,10 +181,43 @@ function! s:matches_wbpy(list, range)
 	else
 		let g:_yavimim_page_nr = page_nr
 	endif
-	let one = (page_nr - 1) * num + a:range[0]
-	let two = one + num - 1
-	let two = two > a:range[1] ? a:range[1] : two
-	return a:list[one : two]
+	let result = [] " [matches1, matches2[,...]]
+	let left = num
+	let offset = 0
+	for data in a:1
+		let [list, range] = data
+		if range == [-1, -1]
+			call add(result, [])
+			continue
+		endif
+		
+		let length = range[1] - range[0] + 1
+		if page_nr * num <= offset || ((page_nr - 1) * num > offset + length)
+			call add(result, [])
+			let offset += length
+			continue
+		endif
+		
+		let start = (page_nr - 1) * num - offset < 0 ?
+					\ 0 : (page_nr - 1) * num - offset
+		let one = range[0] + start
+		let two = one + (page_nr * num - offset) - 1
+		let two = two > range[1] ? range[1] : two
+		let offset += length
+		call add(result, list[one : two])
+	endfor
+	return result
+endfunction
+
+function! s:get_len_range_hub(hub)
+	let total = 0
+	for range in a:hub
+		if range == [-1, -1]
+			continue
+		endif
+		let total += range[1] - range[0] + 1
+	endfor
+	return total
 endfunction
 
 function! s:total_nr(length)
@@ -219,35 +274,11 @@ function! s:encoding(line)
 	endtry
 endfunction
 
-function! s:find_sorted_idx(list, key)
-	" a:list: ['a', 'aa', 'ab', ...]
-	" a:key:   'def'
-	let low = 0
-	let high = len(a:list) - 1
-	let mid = (low + high) / 2
-	let l:key = get(split(a:list[mid], '\s\+'), 0, '')
-
-	while low <= high
-		if l:key < a:key
-			let low = mid + 1
-		elseif l:key > a:key
-			let high = mid - 1
-		else
-			return mid
-		endif
-		let mid = (low + high) / 2
-		let l:key = get(split(a:list[mid], '\s\+'), 0, '')
-	endwhile
-	return -1
-endfunction
-
-function! s:find_sorted_match(list, key, low, high)
-	" a:list: ['a 工', 'a 戈', '@a 啊', ...]
-	" a:key:   'def'
+function! s:sorted_idx(list, key, low, high, func)
 	if a:high >= len(a:list) || a:low > a:high
 		return -1
 	endif
-	let pattern = '^@\='.a:key
+	let Cmp = function(a:func)
 	let low = a:low
 	let high = a:high
 	let mid = (low + high) / 2
@@ -255,14 +286,12 @@ function! s:find_sorted_match(list, key, low, high)
 
 	while low <= high && low >= a:low && high <= a:high &&
 				\ mid >= a:low && mid <= a:high
-		if line =~ pattern
+		let ret = Cmp(line, a:key)
+		if ret == 0
 			return mid
-		endif
-		let start = line[0] == '@' ? 1 : 0
-		let cmp = line[start : strlen(a:key)]
-		if cmp < a:key
+		elseif ret == -1
 			let low = mid + 1
-		elseif cmp > a:key
+		else
 			let high = mid - 1
 		endif
 		let mid = (low + high) / 2
@@ -271,29 +300,41 @@ function! s:find_sorted_match(list, key, low, high)
 	return -1
 endfunction
 
-function! s:sorted_matches_range(list, key)
+function! s:cmp(line, key)
+	let l:key = a:line[: stridx(a:line, ' ') - 1]
+	return l:key == a:key ? 0 : l:key < a:key ? -1 : 1
+endfunction
+
+" @TODO: can this be used to all fcitx database?
+function! s:cmp_wbpy(line, key)
+	let offset = a:line[0] == '@' ? 1 : 0
+	let l:key = a:line[offset : strlen(a:key) + offset - 1]
+	return l:key == a:key ? 0 : l:key < a:key ? -1 : 1
+endfunction
+
+function! s:sorted_matches_range(list, key, func)
 	let high = len(a:list) - 1
-	let sep = s:find_sorted_match(a:list, a:key, 0, high)
+	let sep = s:sorted_idx(a:list, a:key, 0, high, a:func)
 	if sep == -1
 		return [-1, -1]
 	endif
 
-	let lower = s:find_sorted_match(a:list, a:key, 0, sep - 1)
+	let lower = s:sorted_idx(a:list, a:key, 0, sep - 1, a:func)
 	if lower == -1
 		let lower_saver = sep
 	else
 		while lower != -1
 			let lower_saver = lower
-			let lower = s:find_sorted_match(a:list, a:key, 0, lower - 1)
+			let lower = s:sorted_idx(a:list, a:key, 0, lower - 1, a:func)
 		endwhile
 	endif
-	let greater = s:find_sorted_match(a:list, a:key, sep + 1, high)
+	let greater = s:sorted_idx(a:list, a:key, sep + 1, high, a:func)
 	if greater == -1
 		let greater_saver = sep
 	else
 		while greater != -1
 			let greater_saver = greater
-			let greater = s:find_sorted_match(a:list, a:key, greater + 1, high)
+			let greater = s:sorted_idx(a:list, a:key, greater + 1, high, a:func)
 		endwhile
 	endif
 	return [lower_saver, greater_saver]
@@ -364,6 +405,7 @@ function! s:s2t(chars)
 		let s:s2t_lines = {}
 		let idx = 0
 		let tip = "加载简繁体数据库中"
+		" @TODO: take care of zero division
 		let percent = len(lines) / 25
 		for line in lines
 			if idx % percent == 0
@@ -422,4 +464,73 @@ function! yavimim#backend#max_keys()
 	else
 		return 4 + 1
 	endif
+endfunction
+"===============================================================================
+" 用户码表
+"===============================================================================
+let g:yavimim_user_dir = ''
+
+function! s:enabled_user()
+	let s:user_lines = []
+	let dir = g:yavimim_user_dir
+	if empty(dir)
+		let dir = '~/.yavimim/'
+	endif
+	let path_list = split(globpath(dir, "user.txt"), '\n')
+	if len(path_list) != 1
+		return 0
+	endif
+	let path = path_list[0]
+	if !filereadable(path)
+		return 0
+	endif
+	let lines = readfile(path)
+	let s:user_lines = s:pre(lines)
+	return empty(s:user_lines) ? 0 : 1
+endfunction
+
+function! s:get_user_lines()
+	if !exists('s:user_lines')
+		call s:enabled_user()
+	endif
+	return s:user_lines
+endfunction
+
+function! s:format_user(list, key)
+	let words = []
+	for item in a:list
+		let tip = item[0 : stridx(item, ' ') - 1]
+		let tip = tip[strlen(a:key) : ]
+		let word = item[stridx(item, ' ') + 1 : ]
+		let word = s:encoding(word)
+		if empty(word)
+			continue
+		endif
+		if g:yavimim_traditional
+			let word = s:s2t(word)
+		endif
+		let kind = '[用]'
+		call add(words, {'word': word, 'tip': tip, 'kind': kind})
+	endfor
+	return words
+endfunction
+
+function! s:pre(list)
+	" remove comments get maxlength
+	let length = 0
+	let pattern = '\s+'
+	let lines = []
+	" @TODO
+	" for line in a:list
+		" if line =~ '^[;#]'
+			" continue
+		" endif
+		" call add(lines, line)
+		" " let idx = stridx(line, pattern)
+		" " let length = length < idx ? idx : length
+		" " let first = line[: idx - 1]
+		" " let length = length < strlen(first) ? strlen(first) : length
+		" " let second = substitute(line[idx :], '^\s+', '', '')
+	" endfor
+	return a:list
 endfunction
