@@ -30,6 +30,19 @@ endif
 if !exists('g:yavimim_vkbl')
 	let g:yavimim_vkbl              = 'pc103'     " 键盘布局 pc103
 endif
+if !exists('g:yavimim_verbose')
+	let g:yavimim_verbose           = 1           " 提示信息 显示
+endif
+if !exists('g:yavimim_user_dir')
+	" 用户数据目录
+	" user.txt 用户词库数据
+	" cache/ 数据缓存
+	if has("win32")
+		let g:yavimim_user_dir      = '~/_yavimim/'
+	else
+		let g:yavimim_user_dir      = '~/.yavimim/'
+	endif
+endif
 "===============================================================================
 " 主程序
 "===============================================================================

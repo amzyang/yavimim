@@ -103,7 +103,7 @@ function! s:toggle_options()
 		let b:yavimim.completeopt_saved = &completeopt
 		let b:yavimim.pumheight_saved = &pumheight
 		let b:yavimim.iminsert_saved = &l:iminsert
-		let &l:omnifunc='g:yavimim_omnifunc'
+		let &l:omnifunc='yavimim#insert#omnifunc'
 		let &completeopt='menuone'
 		let &pumheight = g:yavimim_pumheight
 	endif
@@ -416,7 +416,7 @@ function! s:fix_cursor_position()
 	let b:yavimim.cursor.column = start
 endfunction
 
-function! g:yavimim_omnifunc(findstart, base)
+function! yavimim#insert#omnifunc(findstart, base)
 	" omnifunc
 	if a:findstart
 		call s:fix_cursor_position()
