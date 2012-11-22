@@ -172,8 +172,10 @@ function! s:mappings()
 	silent execute "lnoremap" s:map_args "<C-H>"
 				\ "<C-R>=yavimim#insert#backspace()<CR>"
 	" 只在补全可见时禁用，其它时候可用
-	silent execute "lnoremap" s:map_args "<Home> <Nop>"
-	silent execute "lnoremap" s:map_args "<End> <Nop>"
+	lnoremap <expr> <silent> <buffer> <Home>
+				\ "<Home>".(pumvisible() ? g:do_after_cancel() : '')
+	lnoremap <expr> <silent> <buffer> <End>
+				\ "<End>".(pumvisible() ? g:do_after_cancel() : '')
 	silent execute "lnoremap" s:map_args "<C-E>"
 				\ "<C-R>=yavimim#insert#ctrl_e()<CR>"
 	silent execute "lnoremap" s:map_args "<Up>"
