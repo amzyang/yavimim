@@ -5,12 +5,16 @@ function! yavimim#highlight#predict()
 				\ b:yavimim.cursor.column, col('.'))
 endfunction
 
-function! yavimim#highlight#highlight(lnum, start, end)
-	let pattern = printf("\\%%%sl\\%%>%dc.*\\%%<%dc", a:lnum, a:start, a:end)
+function! yavimim#highlight#clear()
 	if exists('w:yavimim_highlight_id')
 		call matchdelete(w:yavimim_highlight_id)
 		unlet w:yavimim_highlight_id
 	endif
+endfunction
+
+function! yavimim#highlight#highlight(lnum, start, end)
+	let pattern = printf("\\%%%sl\\%%>%dc.*\\%%<%dc", a:lnum, a:start, a:end)
+	call yavimim#highlight#clear()
 	let w:yavimim_highlight_id = matchadd('YaVimIM', pattern)
 	return ''
 endfunction

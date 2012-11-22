@@ -120,7 +120,7 @@ function! g:do_after_commit()
 	let b:yavimim.state = 0
 	let b:yavimim.pmenu = 0
 	call s:set_cursor_position()
-	call yavimim#highlight#predict()
+	call yavimim#highlight#clear()
 	return ''
 endfunction
 
@@ -134,7 +134,7 @@ endfunction
 function! g:do_after_cancel()
 	let b:yavimim.state = 0
 	call s:set_cursor_position()
-	call yavimim#highlight#predict()
+	call yavimim#highlight#clear()
 	return ''
 endfunction
 
@@ -142,7 +142,7 @@ function! g:set_after_insert_beside_chinese()
 	" 输入的不是中文汉字
 	let b:yavimim.state = 0
 	call s:set_cursor_position()
-	call yavimim#highlight#predict()
+	call yavimim#highlight#clear()
 	return ''
 endfunction
 
