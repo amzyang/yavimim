@@ -13,19 +13,22 @@ if !exists('g:yavimim_imlist')
 	let g:yavimim_imlist            = 'wbpy,wbqq'
 endif
 if !exists('g:yavimim_im')
-	let g:yavimim_im                = 'wbqq' " 默认输入法 五笔QQ
+	let g:yavimim_im                = 'wbqq'      " 默认输入法 五笔QQ
 endif
 if !exists('g:yavimim_traditional')
-	let g:yavimim_traditional       = 0      " 繁体 禁用
+	let g:yavimim_traditional       = 0           " 繁体 禁用
 endif
 if !exists('g:yavimim_candidate')
-	let g:yavimim_candidate         = 5      " 命令行模式下候选词个数 5
+	let g:yavimim_candidate         = 5           " 命令行模式下候选词个数 5
 endif
 if !exists('g:yavimim_pumheight')
-	let g:yavimim_pumheight         = 10     " 插入模式下候选词个数 10
+	let g:yavimim_pumheight         = 10          " 插入模式下候选词个数 10
 endif
 if !exists('g:yavimim_auto_commit')
-	let g:yavimim_auto_commit       = 1      " 启用自动上屏
+	let g:yavimim_auto_commit       = 1           " 启用自动上屏
+endif
+if !exists('g:yavimim_vkbl')
+	let g:yavimim_vkbl              = 'pc103'     " 键盘布局 pc103
 endif
 "===============================================================================
 " 主程序

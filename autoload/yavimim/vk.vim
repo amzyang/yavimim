@@ -1,8 +1,6 @@
 " vim: set noexpandtab nolist tabstop=4 shiftwidth=4:
 scriptencoding utf-8
 
-let g:yavimim_vkbl = 'pc103'
-
 let s:vk = {}
 let s:keyboard = "`1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./"
 let s:keyboard_shift = '~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:"|ZXCVBNM<>?'
@@ -55,7 +53,6 @@ endfunction
 call s:init()
 
 function! s:display_vkb(kb)
-	" @TODO support hhkb/pc103/big enter/laptop
 	let [lefttop, leftbottom, righttop, rightbottom]    = ['┌', '└', '┐', '┘']
 	let [horzup, horzdown, vertleft, vertright]         = ['┴', '┬', '┤', '├']
 	let [vertbar, horzbar]                              = ['│', '─']
