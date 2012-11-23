@@ -256,24 +256,16 @@ function! s:getlines(im)
 endfunction
 
 function! s:encoding(line)
-	if &enc == 'utf-8'
-		return a:line
-	endif
-	try
-		let line = iconv(a:line, 'utf-8', &enc)
-		" 移除编码转换失败词组
-		let pattern = '\S*?\+\l*'
-		let line = substitute(line, pattern, '', 'g')
-		let pattern = '^@\?\l*\s*\l*\s*$'
-		if line =~ pattern
-			return ''
-		endif
-		return line
-	catch /.*/
-		echoerr "Maybe iconv feature is missing.
-					\ See http://www.vim.org/download.php for more details."
+	let line = yavimim#util#encoding(a:line)
+	" @TODO
+	" 移除编码转换失败词组
+	let pattern = '\S*?\+\l*'
+	let line = substitute(line, pattern, '', 'g')
+	let pattern = '^@\?\l*\s*\l*\s*$'
+	if line =~ pattern
 		return ''
-	endtry
+	endif
+	return line
 endfunction
 
 function! s:sorted_idx(list, key, low, high, func)

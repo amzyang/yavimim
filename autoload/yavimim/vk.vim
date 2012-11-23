@@ -37,7 +37,7 @@ function! s:init()
 			call add(s:sections, section)
 			continue
 		endif
-
+		let line = yavimim#util#encoding(line)
 		let key = line[0:0]
 		let val = get(split(line[2:]), 0, '')
 		let val_shift = get(split(line[2:]), 1, '')

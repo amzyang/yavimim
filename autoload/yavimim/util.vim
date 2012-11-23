@@ -52,3 +52,17 @@ endfunction
 function! yavimim#util#nr2float(number)
 	return a:number + 0.0
 endfunction
+
+function! yavimim#util#encoding(line)
+	if &enc == 'utf-8'
+		return a:line
+	endif
+	try
+		let line = iconv(a:line, 'utf-8', &enc)
+		return line
+	catch /.*/
+		echoerr "Maybe iconv feature is missing.
+					\ See http://www.vim.org/download.php for more details."
+		return ''
+	endtry
+endfunction
