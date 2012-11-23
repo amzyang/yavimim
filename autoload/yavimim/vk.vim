@@ -110,9 +110,9 @@ function! s:display_vkb(kb)
 			let origin = has_key(a:kb, key) ? a:kb[key] : ''
 			echohl Comment | echon vertbar | echohl None
 			if empty(shift) && empty(origin)
-				echohl Comment | echon printf("  %s  ", key) | echohl None
+				echohl Comment | echon printf("  %s  ", toupper(key)) | echohl None
 			else
-				echohl Keyword | echon printf("  %s  ", key) | echohl None
+				echohl Keyword | echon printf("  %s  ", toupper(key)) | echohl None
 			endif
 			echohl Comment | echon vertbar.seperator | echohl None
 			let idx +=1
