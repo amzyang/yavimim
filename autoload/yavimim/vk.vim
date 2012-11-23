@@ -34,6 +34,7 @@ function! s:init()
 
 		if line =~ '^NAME='
 			let [nouse, section] = split(line, '=')
+			let section = yavimim#util#encoding(section)
 			call add(s:sections, section)
 			continue
 		endif
@@ -71,7 +72,7 @@ function! s:display_vkb(kb)
 	echohl Comment | echo ">>" | echohl None
 	echon s:keys
 	let title_offset = repeat(' ',
-				\ (max_len * block_width - strlen(join(s:sections, ' '))) / 2)
+				\ (max_len * block_width - strdisplaywidth(join(s:sections, ' '))) / 2)
 	let idx = 0
 	echon "\n".title_offset
 	while idx < len(s:sections)
