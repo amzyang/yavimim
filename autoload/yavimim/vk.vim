@@ -57,10 +57,13 @@ function! s:display_vkb(kb)
 	let [horzup, horzdown, vertleft, vertright]         = ['┴', '┬', '┤', '├']
 	let [vertbar, horzbar]                              = ['│', '─']
 	let scroll                                          = '┼'
+	
+	let spin_width = strdisplaywidth(lefttop)
+	let bar_repeat = 4 / spin_width
 
-	let topcover = lefttop . repeat(horzbar, 5) . righttop
-	let bottomcover = leftbottom . repeat(horzbar, 5) . rightbottom
-	let seperator = ' '
+	let topcover = lefttop . repeat(horzbar, bar_repeat) . righttop
+	let bottomcover = leftbottom . repeat(horzbar, bar_repeat) . rightbottom
+	let block_width = 4 + 2 * spin_width
 
 	let outeridx = 0
 	let layout_keys = s:vkbl[g:yavimim_vkbl]
@@ -68,7 +71,7 @@ function! s:display_vkb(kb)
 	echohl Comment | echo ">>" | echohl None
 	echon s:keys
 	let title_offset = repeat(' ',
-				\ (max_len * 8 - strlen(join(s:sections, '  '))) / 2)
+				\ (max_len * block_width - strlen(join(s:sections, ' '))) / 2)
 	let idx = 0
 	echon "\n".title_offset
 	while idx < len(s:sections)
@@ -78,14 +81,14 @@ function! s:display_vkb(kb)
 			echohl Comment | echon s:sections[idx] | echohl None
 		endif
 		if (idx < len(s:sections) - 1)
-			echon seperator.seperator
+			echon ' '
 		endif
 		let idx += 1
 	endwhile
 	while outeridx < len(layout_keys)
 		let keys = layout_keys[outeridx]
-		let offset = repeat(' ', (max_len - len(keys)) * 4)
-		let start = repeat(topcover . seperator, strlen(keys))
+		let offset = repeat(' ', ((max_len - len(keys)) * block_width) / 2)
+		let start = repeat(topcover, strlen(keys))
 		echohl Comment | echon "\n".offset.start | echohl None
 		let idx = 0
 		echon "\n".offset
@@ -95,10 +98,10 @@ function! s:display_vkb(kb)
 			let shift = has_key(a:kb, key_shift) ?  a:kb[key_shift] : ''
 			let origin = has_key(a:kb, key) ? a:kb[key] : ''
 			echohl Comment | echon vertbar | echohl None
-			let spaces = repeat(' ', 5 - strdisplaywidth(origin.shift))
+			let spaces = repeat(' ', 4 - strdisplaywidth(origin.shift))
 			echohl Normal
 			echon printf("%-s%s%s", origin, spaces, shift) | echohl None
-			echohl Comment | echon vertbar.seperator | echohl None
+			echohl Comment | echon vertbar | echohl None
 			let idx +=1
 		endwhile
 		let idx = 0
@@ -110,14 +113,14 @@ function! s:display_vkb(kb)
 			let origin = has_key(a:kb, key) ? a:kb[key] : ''
 			echohl Comment | echon vertbar | echohl None
 			if empty(shift) && empty(origin)
-				echohl Comment | echon printf("  %s  ", toupper(key)) | echohl None
+				echohl Comment | echon printf(" %s  ", toupper(key)) | echohl None
 			else
-				echohl Keyword | echon printf("  %s  ", toupper(key)) | echohl None
+				echohl Keyword | echon printf(" %s  ", toupper(key)) | echohl None
 			endif
-			echohl Comment | echon vertbar.seperator | echohl None
+			echohl Comment | echon vertbar | echohl None
 			let idx +=1
 		endwhile
-		let end = repeat(bottomcover . seperator, strlen(keys))
+		let end = repeat(bottomcover, strlen(keys))
 		echohl Comment | echon "\n".offset.end | echohl None
 		let outeridx += 1
 	endwhile
