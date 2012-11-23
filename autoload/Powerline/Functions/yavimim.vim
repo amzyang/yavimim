@@ -7,6 +7,7 @@ function! Powerline#Functions#yavimim#status()
 	endif
 	let sim_cht = g:yavimim_traditional ? '繁' : '简'
 	let im = yavimim#backend#getim()
-	return im.name."·".sim_cht
+	let name = 'name' . (g:yavimim_traditional ? '_cht' : '')
+	return im[name]."·".sim_cht
 endfunction
 

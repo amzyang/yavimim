@@ -338,10 +338,12 @@ function! yavimim#backend#setup_backend()
 	let s:yavimim.backends = {
 				\ 'wbqq': {'id': 'qq',
 					\ 'type': 'wubi',
-					\ 'name': 'QQ五笔'},
+					\ 'name': 'QQ五笔',
+					\ 'name_cht': 'QQ五筆'},
 				\ 'wbpy': {'id':'wbpy',
-				\ 'type': 'wubi',
-				\ 'name': '五笔拼音'}
+					\ 'type': 'wubi',
+					\ 'name': '五笔拼音',
+					\ 'name_cht': '五筆拚音'}
 				\ }
 	for [key, im] in items(s:yavimim.backends)
 		let path_store = s:getpath(im)
