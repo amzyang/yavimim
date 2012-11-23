@@ -201,7 +201,9 @@ function! s:matches(...)
 		let start = (page_nr - 1) * num - offset < 0 ?
 					\ 0 : (page_nr - 1) * num - offset
 		let one = range[0] + start
-		let two = one + (page_nr * num - offset) - 1
+		let process_cnt = offset - ((page_nr - 1) * num)
+		let left = process_cnt > 0 ? num - process_cnt : num
+		let two = one + left - 1
 		let two = two > range[1] ? range[1] : two
 		let offset += length
 		call add(result, list[one : two])
