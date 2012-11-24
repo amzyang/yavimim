@@ -272,7 +272,6 @@ function! s:sorted_idx(list, key, low, high, func)
 	if a:high >= len(a:list) || a:low > a:high
 		return -1
 	endif
-	let Cmp = function(a:func)
 	let low = a:low
 	let high = a:high
 	let mid = (low + high) / 2
@@ -280,7 +279,7 @@ function! s:sorted_idx(list, key, low, high, func)
 
 	while low <= high && low >= a:low && high <= a:high &&
 				\ mid >= a:low && mid <= a:high
-		let ret = Cmp(line, a:key)
+		let ret = call(a:func, [line, a:key])
 		if ret == 0
 			return mid
 		elseif ret == -1
