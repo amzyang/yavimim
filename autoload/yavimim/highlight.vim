@@ -24,7 +24,29 @@ function! yavimim#highlight#init_color()
 	" highlight lCursor
 	" use matchadd or syntax?
 	" conceal???
-	highlight  default lCursorIM guifg=NONE guibg=green gui=NONE
-	highlight! link lCursor lCursorIM
-	highlight! link YaVimIM Visual
+	if !hlexists('lCursorIM')
+		highlight lCursorIM guifg=NONE guibg=green gui=NONE
+	endif
+	highlight! default link lCursor lCursorIM
+	if !hlexists('YaVimIM')
+		highlight link YaVimIM Visual
+	endif
+	if !hlexists('YaVimIMComment')
+		highlight link YaVimIMComment Comment
+	endif
+	if !hlexists('YaVimIMKeyword')
+		highlight link YaVimIMKeyword Keyword
+	endif
+	if !hlexists('YaVimIMNumber')
+		highlight link YaVimIMNumber Number
+	endif
+	if !hlexists('YaVimIMWarningMsg')
+		highlight link YaVimIMWarningMsg WarningMsg
+	endif
+	if !hlexists('YaVimIMTitle')
+		highlight link YaVimIMTitle Title
+	endif
+	if !hlexists('YaVimIMNormal')
+		highlight link YaVimIMNormal Normal
+	endif
 endfunction

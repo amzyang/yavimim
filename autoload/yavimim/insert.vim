@@ -208,7 +208,7 @@ function! s:mappings()
 endfunction
 
 function! yavimim#insert#en_pre()
-	echohl Comment
+	echohl YaVimIMComment
 	return ''
 endfunction
 

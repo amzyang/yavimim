@@ -29,7 +29,7 @@ function! s:mappings()
 endfunction
 
 function! yavimim#cmdline#en()
-	echohl Comment
+	echohl YaVimIMComment
 	let string = input(">>")
 	echohl None
 	return string
@@ -192,10 +192,10 @@ function! s:echo()
 	echo pieces[0].pieces[1]
 	echohl YaVimIM | echon pieces[2] | echohl None
 	echon pieces[3]
-	echohl Comment | echon "\r\n[五]" | echohl None
+	echohl YaVimIMComment | echon "\r\n[五]" | echohl None
 	if empty(s:match_lists)
 		echon " "
-		echohl WarningMsg | echon "无候选词" | echohl None 
+		echohl YaVimIMWarningMsg | echon "无候选词" | echohl None 
 	else
 		let idx = 1
 		for item in s:match_lists
@@ -204,11 +204,11 @@ function! s:echo()
 			else
 				echon "  "
 			endif
-			echohl Number | echon idx % 10 | echohl None
-			echohl Comment | echon "." | echohl None
+			echohl YaVimIMNumber | echon idx % 10 | echohl None
+			echohl YaVimIMComment | echon "." | echohl None
 			echon item.word
-			echohl Comment | echon item.tip | echohl None
-			echohl Comment | echon item.kind | echohl None
+			echohl YaVimIMComment | echon item.tip | echohl None
+			echohl YaVimIMComment | echon item.kind | echohl None
 			let idx += 1
 		endfor
 		if g:_yavimim_total_nr > 1

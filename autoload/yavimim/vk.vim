@@ -69,7 +69,7 @@ function! s:display_vkb(kb)
 	let outeridx = 0
 	let layout_keys = s:vkbl[g:yavimim_vkbl]
 	let max_len = s:max_row_length(layout_keys)
-	echohl Comment | echo ">>" | echohl None
+	echohl YaVimIMComment | echo ">>" | echohl None
 	echon s:keys
 	let title_offset = repeat(' ',
 				\ (max_len * block_width - strdisplaywidth(join(s:sections, ' '))) / 2)
@@ -77,9 +77,9 @@ function! s:display_vkb(kb)
 	echon "\n".title_offset
 	while idx < len(s:sections)
 		if (idx == s:vk_idx)
-			echohl Title | echon s:sections[idx] | echohl None
+			echohl YaVimIMTitle | echon s:sections[idx] | echohl None
 		else
-			echohl Comment | echon s:sections[idx] | echohl None
+			echohl YaVimIMComment | echon s:sections[idx] | echohl None
 		endif
 		if (idx < len(s:sections) - 1)
 			echon ' '
@@ -90,7 +90,7 @@ function! s:display_vkb(kb)
 		let keys = layout_keys[outeridx]
 		let offset = repeat(' ', ((max_len - len(keys)) * block_width) / 2)
 		let start = repeat(topcover, strlen(keys))
-		echohl Comment | echon "\n".offset.start | echohl None
+		echohl YaVimIMComment | echon "\n".offset.start | echohl None
 		let idx = 0
 		echon "\n".offset
 		while idx < len(keys)
@@ -98,11 +98,11 @@ function! s:display_vkb(kb)
 			let key_shift = s:char_shift_mod(key)
 			let shift = has_key(a:kb, key_shift) ?  a:kb[key_shift] : ''
 			let origin = has_key(a:kb, key) ? a:kb[key] : ''
-			echohl Comment | echon vertbar | echohl None
+			echohl YaVimIMComment | echon vertbar | echohl None
 			let spaces = repeat(' ', 4 - strdisplaywidth(origin.shift))
-			echohl Normal
+			echohl YaVimIMNormal
 			echon printf("%-s%s%s", origin, spaces, shift) | echohl None
-			echohl Comment | echon vertbar | echohl None
+			echohl YaVimIMComment | echon vertbar | echohl None
 			let idx +=1
 		endwhile
 		let idx = 0
@@ -112,17 +112,17 @@ function! s:display_vkb(kb)
 			let key_shift = s:char_shift_mod(key)
 			let shift = has_key(a:kb, key_shift) ?  a:kb[key_shift] : ''
 			let origin = has_key(a:kb, key) ? a:kb[key] : ''
-			echohl Comment | echon vertbar | echohl None
+			echohl YaVimIMComment | echon vertbar | echohl None
 			if empty(shift) && empty(origin)
-				echohl Comment | echon printf(" %s  ", toupper(key)) | echohl None
+				echohl YaVimIMComment | echon printf(" %s  ", toupper(key)) | echohl None
 			else
-				echohl Keyword | echon printf(" %s  ", toupper(key)) | echohl None
+				echohl YaVimIMKeyword | echon printf(" %s  ", toupper(key)) | echohl None
 			endif
-			echohl Comment | echon vertbar | echohl None
+			echohl YaVimIMComment | echon vertbar | echohl None
 			let idx +=1
 		endwhile
 		let end = repeat(bottomcover, strlen(keys))
-		echohl Comment | echon "\n".offset.end | echohl None
+		echohl YaVimIMComment | echon "\n".offset.end | echohl None
 		let outeridx += 1
 	endwhile
 	echon "\r"
