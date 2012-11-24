@@ -39,7 +39,7 @@ function! yavimim#util#debugprint(list)
 endfunction
 
 function! yavimim#util#getmode()
-	return mode(1) == 'i' ? 'insert' : 'cmdline'
+	return stridx("iR", mode(1)) + 1 ? 'insert' : 'cmdline'
 endfunction
 
 function! yavimim#util#keycode(name)
