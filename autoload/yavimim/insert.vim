@@ -423,12 +423,12 @@ function! yavimim#insert#omnifunc(findstart, base)
 		let base = getline(b:yavimim.cursor.line)
 					\[b:yavimim.cursor.column:col('.') - 2]
 		if !strlen(base)
-			return -3
+			return yavimim#util#cpt_cancel()
 		endif
 		let b:yavimim.base = base
 		let b:yavimim.has = yavimim#backend#has(base)
 		if !b:yavimim.has
-			return -3
+			return yavimim#util#cpt_cancel()
 		endif
 		return b:yavimim.cursor.column
 	else
