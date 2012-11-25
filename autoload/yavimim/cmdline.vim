@@ -56,32 +56,8 @@ function! yavimim#cmdline#letter(char)
 		let nr = getchar()
 		let char = type(nr) == type(0) ? nr2char(nr) : ''
 		
-		" lowercase character
-		if char =~ '\l'
-			let s:match_lists = yavimim#backend#matches(s:keys)
-			if strlen(s:keys) == 4 && !g:_yavimim_pinyin_in_matches &&
-						\ len(s:match_lists)
-				return s:do_commit()."\<C-R>=".maparg(char, 'l')."\<CR>"
-			endif
-			let s:keys .= char
-			let s:match_lists = yavimim#backend#matches(s:keys)
-			if len(s:match_lists) &&
-						\ yavimim#backend#should_auto_commit(strlen(s:keys))
-				return s:do_commit()
-			endif
-			let g:_yavimim_page_nr = 1
-			call s:echo()
-		" digit
-		elseif char =~ '\d'
-			" @TODO: don't overflow
-			let char = char ? char : 10
-			if char > len(s:match_lists) || char > yavimim#util#get_number()
-			else
-				let s:match_lists = yavimim#backend#matches(s:keys)
-				return s:do_commit(char - 1)
-			endif
 		" backspace/ctrl-h
-		elseif nr == "\<BS>" || nr == 8
+		if nr == "\<BS>" || nr == 8
 			if !empty(s:keys)
 				let len = strlen(s:keys)
 				if len == 1
@@ -138,6 +114,30 @@ function! yavimim#cmdline#letter(char)
 			endif
 			let s:match_lists = yavimim#backend#matches(s:keys)
 			call s:echo()
+		" lowercase character
+		elseif char =~ '\l'
+			let s:match_lists = yavimim#backend#matches(s:keys)
+			if strlen(s:keys) == 4 && !g:_yavimim_pinyin_in_matches &&
+						\ len(s:match_lists)
+				return s:do_commit()."\<C-R>=".maparg(char, 'l')."\<CR>"
+			endif
+			let s:keys .= char
+			let s:match_lists = yavimim#backend#matches(s:keys)
+			if len(s:match_lists) &&
+						\ yavimim#backend#should_auto_commit(strlen(s:keys))
+				return s:do_commit()
+			endif
+			let g:_yavimim_page_nr = 1
+			call s:echo()
+		" digit
+		elseif char =~ '\d'
+			" @TODO: don't overflow
+			let char = char ? char : 10
+			if char > len(s:match_lists) || char > yavimim#util#get_number()
+			else
+				let s:match_lists = yavimim#backend#matches(s:keys)
+				return s:do_commit(char - 1)
+			endif
 		else
 			return s:do_cancel_commit()
 		endif
@@ -151,11 +151,11 @@ function! s:do_commit(...)
 endfunction
 
 function! s:do_cancel_commit()
-	let g:_yavimim_page_nr = 1
-	let key = s:keys
-	let s:keys = ''
-	let s:match_lists = []
-	return key
+	if empty(s:keys)
+		silent execute printf('return "%s"', '\<C-L>')
+	else
+		return s:keys
+	endif
 endfunction
 
 function! s:lmap_punctuations()
