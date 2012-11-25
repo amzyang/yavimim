@@ -119,7 +119,7 @@ function! yavimim#cmdline#letter(char)
 			let s:match_lists = yavimim#backend#matches(s:keys)
 			if strlen(s:keys) == 4 && !g:_yavimim_pinyin_in_matches &&
 						\ len(s:match_lists)
-				return s:do_commit()."\<C-R>=".maparg(char, 'l')."\<CR>"
+				return s:do_commit()."\<C-R>=".feedkeys(char, 't')." ? '' : ''\<CR>"
 			endif
 			let s:keys .= char
 			let s:match_lists = yavimim#backend#matches(s:keys)
