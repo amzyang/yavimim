@@ -111,7 +111,7 @@ function! yavimim#backend#matches(key)
 	endif
 	let total_nr = s:total_nr(s:get_len_range_hub(range_hub))
 
-	let mode = yavimim#util#getmode()
+	let mode = yavimim#util#get_mode()
 	if mode == 'insert'
 		call s:data_omni(words)
 		if total_nr != 1
@@ -168,9 +168,9 @@ function! s:matches(...)
 		let total_cnt += range[1] - range[0] + 1
 	endfor
 	let total_nr = s:total_nr(total_cnt)
-	let mode = yavimim#util#getmode()
-	let page_nr = mode == 'insert' ? b:yavimim.page_nr : g:_yavimim_page_nr
-	let num = mode == 'insert' ? &pumheight : g:yavimim_candidate
+	let mode = yavimim#util#get_mode()
+	let page_nr = yavimim#util#get_page_nr()
+	let number = yavimim#util#get_number()
 	if page_nr < 1
 		let page_nr = total_nr
 	elseif page_nr > total_nr
@@ -182,7 +182,7 @@ function! s:matches(...)
 		let g:_yavimim_page_nr = page_nr
 	endif
 	let result = [] " [matches1, matches2[,...]]
-	let left = num
+	let left = number
 	let offset = 0
 	for data in a:1
 		let [list, range] = data
@@ -192,17 +192,17 @@ function! s:matches(...)
 		endif
 		
 		let length = range[1] - range[0] + 1
-		if page_nr * num <= offset || ((page_nr - 1) * num > offset + length)
+		if page_nr * number <= offset || ((page_nr - 1) * number > offset + length)
 			call add(result, [])
 			let offset += length
 			continue
 		endif
 		
-		let start = (page_nr - 1) * num - offset < 0 ?
-					\ 0 : (page_nr - 1) * num - offset
+		let start = (page_nr - 1) * number - offset < 0 ?
+					\ 0 : (page_nr - 1) * number - offset
 		let one = range[0] + start
-		let process_cnt = offset - ((page_nr - 1) * num)
-		let left = process_cnt > 0 ? num - process_cnt : num
+		let process_cnt = offset - ((page_nr - 1) * number)
+		let left = process_cnt > 0 ? number - process_cnt : number
 		let two = one + left - 1
 		let two = two > range[1] ? range[1] : two
 		let offset += length
@@ -223,9 +223,8 @@ function! s:get_len_range_hub(hub)
 endfunction
 
 function! s:total_nr(length)
-	let mode = yavimim#util#getmode()
-	let num = mode == 'insert' ? &pumheight : g:yavimim_candidate
-	return float2nr(ceil(a:length / yavimim#util#nr2float(num)))
+	let number = yavimim#util#get_number()
+	return float2nr(ceil(a:length / yavimim#util#nr2float(number)))
 endfunction
 
 function! s:getlines(im)
@@ -438,7 +437,7 @@ endfunction
 
 function! yavimim#backend#should_auto_commit(...)
 	let len = a:0 ? a:1 : 0
-	let mode = yavimim#util#getmode()
+	let mode = yavimim#util#get_mode()
 	let length_checking = mode == 'insert' ? 4 : 5
 	" 还有拼音候选
 	if g:_yavimim_pinyin_in_matches

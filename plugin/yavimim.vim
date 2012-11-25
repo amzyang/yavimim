@@ -18,14 +18,15 @@ endif
 if !exists('g:yavimim_traditional')
 	let g:yavimim_traditional       = 0           " 繁体 禁用
 endif
-if !exists('g:yavimim_candidate')
-	let g:yavimim_candidate         = 5           " 命令行模式下候选词个数 5
-endif
-if !exists('g:yavimim_pumheight')
-	let g:yavimim_pumheight         = 10          " 插入模式下候选词个数 10
+if !exists('g:yavimim_number')
+	" 逗号分隔，前一个数字代表命令行模式下的候选词个数，后一个数字代表插入模式下
+	" 的候选词个数，如果为一个单独的数字，则表示这两种模式下候选词个数均为该值。
+	let g:yavimim_number            = '5'         " 候选词个数 5 5
+	let g:yavimim_number            = '5,10'      " 候选词个数，逗号分隔 5 10
+
 endif
 if !exists('g:yavimim_auto_commit')
-	let g:yavimim_auto_commit       = 1           " 启用自动上屏
+	let g:yavimim_auto_commit       = 1           " 自动上屏 启用
 endif
 if !exists('g:yavimim_vkbl')
 	let g:yavimim_vkbl              = 'pc103'     " 键盘布局 pc103

@@ -38,8 +38,26 @@ function! yavimim#util#debugprint(list)
 	endif
 endfunction
 
-function! yavimim#util#getmode()
+function! yavimim#util#get_mode()
 	return stridx("iR", mode(1)) + 1 ? 'insert' : 'cmdline'
+endfunction
+
+function! yavimim#util#get_number()
+	let numbers = split(g:yavimim_number, '\s*,\s*')
+	let cmdline = str2nr(numbers[0])
+	let cmdline = cmdline ? cmdline : 5
+	let insert = len(numbers) == 2 ? str2nr(numbers[1]) : cmdline
+	let insert = insert ? insert : 10
+	let mode = yavimim#util#get_mode()
+	let num = mode == 'insert' ? insert : cmdline
+	return num
+endfunction
+
+function! yavimim#util#get_page_nr()
+	let mode = yavimim#util#get_mode()
+	let page_nr = mode == 'insert' ? b:yavimim.page_nr :
+				\ g:_yavimim_page_nr
+	return page_nr
 endfunction
 
 function! yavimim#util#keycode(name)
