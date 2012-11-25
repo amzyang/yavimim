@@ -49,6 +49,7 @@ function! yavimim#cmdline#letter(char)
 	let s:cmdtype = getcmdtype()
 	let im = yavimim#backend#getim()
 	let s:keys = a:char
+	let g:_yavimim_page_nr = 1
 	let s:match_lists = yavimim#backend#matches(s:keys)
 	call s:echo()
 	while 1
@@ -146,9 +147,6 @@ endfunction
 
 function! s:do_commit(...)
 	let idx = a:0 > 0 ? a:1 : 0
-	let g:_yavimim_page_nr = 1
-	let s:keys = ''
-	call s:echo()
 	return s:match_lists[idx]['word']
 endfunction
 
