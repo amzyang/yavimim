@@ -74,7 +74,7 @@ function! yavimim#cmdline#letter(char)
 		elseif char =~ '\d'
 			" @TODO: don't overflow
 			let char = char ? char : 10
-			if char > len(s:match_lists) || char > g:yavimim_candidate
+			if char > len(s:match_lists) || char > yavimim#util#get_number()
 			else
 				let s:match_lists = yavimim#backend#matches(s:keys)
 				return s:do_commit(char - 1)
