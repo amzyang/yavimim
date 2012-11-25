@@ -95,15 +95,12 @@ endfunction
 
 function! s:toggle_options()
 	if &l:iminsert == 1
-		let &l:omnifunc = b:yavimim.omnifunc_saved
 		let &completeopt = b:yavimim.completeopt_saved
 		let &pumheight = b:yavimim.pumheight_saved
 	else
-		let b:yavimim.omnifunc_saved = &l:omnifunc
 		let b:yavimim.completeopt_saved = &completeopt
 		let b:yavimim.pumheight_saved = &pumheight
 		let b:yavimim.iminsert_saved = &l:iminsert
-		let &l:omnifunc='yavimim#insert#omnifunc'
 		let &completeopt='menuone'
 		let &pumheight = g:yavimim_pumheight
 	endif
@@ -159,6 +156,10 @@ endfunction
 " ==============================================================================
 " key mappings
 " ==============================================================================
+function! s:incre_helper(incre)
+	return printf("yavimim#insert#page(%d) .
+				\ '<C-E><C-R>=yavimim#insert#complete()<CR><C-P>' :", a:incre)
+endfunction
 function! s:mappings()
 	" binding all keys
 	lmapclear
@@ -184,19 +185,19 @@ function! s:mappings()
 				\ "<C-R>=g:change_cursor_pmenu_position(1)<CR><Down>"
 	silent execute "lnoremap <expr>" s:map_args "-"
 				\ "pumvisible() ?"
-				\ "yavimim#insert#page(-1) . '<C-E><C-X><C-O><C-P>' :"
+				\ s:incre_helper(-1)
 				\ "'-'"
 	silent execute "lnoremap <expr>" s:map_args "<PageUp>"
 				\ "pumvisible() ?"
-				\ "yavimim#insert#page(-1) . '<C-E><C-X><C-O><C-P>' :"
+				\ s:incre_helper(-1)
 				\ "'<PageUp>'"
 	silent execute "lnoremap <expr>" s:map_args "="
 				\ "pumvisible() ?"
-				\ "yavimim#insert#page(1) . '<C-E><C-X><C-O><C-P>' :"
+				\ s:incre_helper(1)
 				\ "'='"
 	silent execute "lnoremap <expr>" s:map_args "<PageDown>"
 				\ "pumvisible() ?"
-				\ "yavimim#insert#page(1) . '<C-E><C-X><C-O><C-P>' :"
+				\ s:incre_helper(1)
 				\ "'<PageDown>'"
 	" silent execute "lnoremap" s:map_args "<C-U>"
 				" \ "<C-R>=g:do_after_cancel()<CR><C-U>"
@@ -302,12 +303,14 @@ function! yavimim#insert#quote(type)
 endfunction
 
 function! yavimim#insert#backspace()
-	let key = '\<BackSpace>'
+	let key = '\<C-E>\<BackSpace>'
 	let step = (col('.') - 1 - b:yavimim.cursor.column)
+	let step_left = step - 1
 	" 因为此时还没开始做退格操作，在删之后是4个就要做自动补全，所以在删之前是5个
 	" 对于混拼，则是计算拼音的长度
-	if step <= yavimim#backend#max_keys()
-		let key .= '\<C-X>\<C-O>\<C-R>=g:do_trigger_completion()\<CR>'
+	if step_left <= yavimim#backend#max_keys() && step_left > 0
+		let key .= '\<C-R>=yavimim#insert#complete()\<CR>' .
+					\ '\<C-R>=g:do_trigger_completion()\<CR>'
 	endif
 	silent execute printf('return "%s"', key)
 endfunction
@@ -371,7 +374,8 @@ function! s:lmap_letter_wubi(char)
 		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
 	endif
 	let key .= a:char . '\<C-R>=g:do_waiting_commit()\<CR>' .
-				\ '\<C-X>\<C-O>\<C-R>=g:do_trigger_completion()\<CR>'
+				\ '\<C-R>=yavimim#insert#complete()\<CR>' .
+				\ '\<C-R>=g:do_trigger_completion()\<CR>'
 	silent execute printf('return "%s"', key)
 endfunction
 
@@ -416,24 +420,20 @@ function! s:fix_cursor_position()
 	let b:yavimim.cursor.column = start
 endfunction
 
-function! yavimim#insert#omnifunc(findstart, base)
-	" omnifunc
-	if a:findstart
+function! yavimim#insert#complete()
 		call s:fix_cursor_position()
 		let base = getline(b:yavimim.cursor.line)
 					\[b:yavimim.cursor.column:col('.') - 2]
 		if !strlen(base)
-			return yavimim#util#cpt_cancel()
+			return ''
 		endif
 		let b:yavimim.base = base
 		let b:yavimim.has = yavimim#backend#has(base)
 		if !b:yavimim.has
-			return yavimim#util#cpt_cancel()
+			return ''
 		endif
-		return b:yavimim.cursor.column
-	else
-		return yavimim#backend#matches(b:yavimim.base)
-	endif
+		call complete(col('.') - strlen(base), yavimim#backend#matches(base))
+		return ''
 endfunction
 
 function! yavimim#insert#page(incre)

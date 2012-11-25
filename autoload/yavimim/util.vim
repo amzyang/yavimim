@@ -66,17 +66,3 @@ function! yavimim#util#encoding(line)
 		return ''
 	endtry
 endfunction
-
-function! yavimim#util#cpt_cancel()
-	let ret = -1
-	if v:version > 703
-		let ret = -3
-	elseif v:version == 703
-		if has('patch519')
-			let ret = -3
-		elseif has('patch418')
-			let ret = -2
-		endif
-	endif
-	return ret
-endfunction
