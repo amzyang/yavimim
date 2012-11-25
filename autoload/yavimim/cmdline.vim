@@ -213,6 +213,7 @@ function! s:echo()
 			echon "  " g:_yavimim_page_nr "/" g:_yavimim_total_nr
 		endif
 	endif
+	echon "\r"
 endfunction
 
 function! s:get_updated_cmdline()
