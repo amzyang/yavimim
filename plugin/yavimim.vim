@@ -39,7 +39,7 @@ if !exists('g:yavimim_user_dir')
 	" user.txt 用户词库数据
 	" cache/ 数据缓存
 	if has("win32")
-		let g:yavimim_user_dir      = '~/_yavimim/'
+		let g:yavimim_user_dir      = '~/yavimim/'
 	else
 		let g:yavimim_user_dir      = '~/.yavimim/'
 	endif

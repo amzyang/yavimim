@@ -41,16 +41,10 @@ endfunction
 function! yavimim#backend#matches(key)
 	let im = yavimim#backend#getim()
 	let lines = s:getlines(im)
-	let has_user_db = s:enabled_user()
-	let range_hub = []
-	let matches_hub = []
-	let lines_hub = []
-	let lines_range_hub = []
 	let user_lines = s:get_user_lines()
 	let user_range = s:sorted_matches_range(user_lines, a:key, 's:cmp_wbpy')
-	call add(range_hub, user_range)
-	call add(lines_hub, user_lines)
-	call add(lines_range_hub, [user_lines, user_range])
+	let range_hub = [user_range]
+	let lines_range_hub = [[user_lines, user_range]]
 	let words = []
 	let g:_yavimim_pinyin_in_matches = 0
 	if im.type == 'wubi'
@@ -71,7 +65,6 @@ function! yavimim#backend#matches(key)
 			endif
 			call add(lines_range_hub, [parts, range])
 			call add(range_hub, range)
-			call add(lines_hub, parts)
 			let [user_matches, matches] = s:matches(lines_range_hub)
 			let g:_yavimim_only = len(user_matches) + len(matches) == 1 ? 1 : 0
 			for match in matches
@@ -85,7 +78,6 @@ function! yavimim#backend#matches(key)
 			endif
 			call add(lines_range_hub, [lines, range])
 			call add(range_hub, range)
-			call add(lines_hub, lines)
 			let [user_matches, matches] = s:matches(lines_range_hub)
 			let g:_yavimim_only = len(user_matches) + len(matches) == 1 ? 1 : 0
 			for match in matches
@@ -461,8 +453,6 @@ endfunction
 "===============================================================================
 " 用户码表
 "===============================================================================
-let g:yavimim_user_dir = ''
-
 function! s:enabled_user()
 	let s:user_lines = []
 	let dir = g:yavimim_user_dir
@@ -475,7 +465,7 @@ function! s:enabled_user()
 		return 0
 	endif
 	let lines = readfile(path)
-	let s:user_lines = s:pre(lines)
+	let s:user_lines = lines
 	return empty(s:user_lines) ? 0 : 1
 endfunction
 
@@ -503,24 +493,4 @@ function! s:format_user(list, key)
 		call add(words, {'word': word, 'tip': tip, 'kind': kind})
 	endfor
 	return words
-endfunction
-
-function! s:pre(list)
-	" remove comments get maxlength
-	let length = 0
-	let pattern = '\s+'
-	let lines = []
-	" @TODO
-	" for line in a:list
-		" if line =~ '^[;#]'
-			" continue
-		" endif
-		" call add(lines, line)
-		" " let idx = stridx(line, pattern)
-		" " let length = length < idx ? idx : length
-		" " let first = line[: idx - 1]
-		" " let length = length < strlen(first) ? strlen(first) : length
-		" " let second = substitute(line[idx :], '^\s+', '', '')
-	" endfor
-	return a:list
 endfunction
