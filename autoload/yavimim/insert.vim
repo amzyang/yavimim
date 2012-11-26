@@ -200,26 +200,14 @@ function! s:mappings()
 	call s:lmap_letters()
 endfunction
 
-function! yavimim#insert#en_pre()
-	echohl YaVimIMComment
-	return ''
-endfunction
-
-function! yavimim#insert#en_post()
-	echohl None
-	return ''
-endfunction
-
 function! yavimim#insert#en()
-	if pumvisible()
-		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
-	else
-		let key = '\<C-R>=g:do_after_cancel()\<CR>'
-	endif
-	let key .= "\<C-R>=yavimim#insert#en_pre()\<CR>"
-	let key .= "\<C-R>=input('>>')\<CR>"
-	let key .= "\<C-R>=yavimim#insert#en_post()\<CR>"
-	silent execute printf('return "%s"', key)
+	call g:do_after_cancel()
+	echohl YaVimIMComment
+	call inputsave()
+	let key = input('>>')
+	call inputrestore()
+	echohl None
+	return key
 endfunction
 
 function! yavimim#insert#vk()
