@@ -74,7 +74,6 @@ function! yavimim#backend#matches(key)
 			call add(lines_hub, parts)
 			let [user_matches, matches] = s:matches(lines_range_hub)
 			let g:_yavimim_only = len(user_matches) + len(matches) == 1 ? 1 : 0
-			let words = s:format_user(user_matches, a:key)
 			for match in matches
 				let [word, tip] = s:wbqq_spliter(match)
 				call add(words, {'word': word, 'tip': tip, 'kind': ''})
@@ -89,7 +88,6 @@ function! yavimim#backend#matches(key)
 			call add(lines_hub, lines)
 			let [user_matches, matches] = s:matches(lines_range_hub)
 			let g:_yavimim_only = len(user_matches) + len(matches) == 1 ? 1 : 0
-			let words = s:format_user(user_matches, a:key)
 			for match in matches
 				let [tip, word] = split(match)
 				let word = s:encoding(word)
@@ -109,6 +107,7 @@ function! yavimim#backend#matches(key)
 		endif
 	else
 	endif
+	call extend(words, s:format_user(user_matches, a:key))
 	let total_nr = s:total_nr(s:get_len_range_hub(range_hub))
 
 	let mode = yavimim#util#get_mode()
