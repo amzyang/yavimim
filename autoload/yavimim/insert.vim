@@ -283,7 +283,11 @@ function! yavimim#insert#quote(type)
 endfunction
 
 function! yavimim#insert#backspace()
-	let key = '\<C-E>\<BackSpace>'
+	if pumvisible()
+		let key = '\<C-E>\<BackSpace>'
+	else
+		let key = '\<BackSpace>'
+	endif
 	let step = (col('.') - 1 - b:yavimim.cursor.column)
 	let step_left = step - 1
 	" 因为此时还没开始做退格操作，在删之后是4个就要做自动补全，所以在删之前是5个
