@@ -467,13 +467,10 @@ function! s:enabled_user()
 	let s:user_lines = []
 	let dir = g:yavimim_user_dir
 	if empty(dir)
+		" @TODO: windows
 		let dir = '~/.yavimim/'
 	endif
-	let path_list = split(globpath(dir, "user.txt"), '\n')
-	if len(path_list) != 1
-		return 0
-	endif
-	let path = path_list[0]
+	let path = findfile("user.txt", expand(dir))
 	if !filereadable(path)
 		return 0
 	endif
