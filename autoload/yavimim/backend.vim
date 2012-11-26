@@ -433,7 +433,7 @@ function! yavimim#backend#should_auto_commit(...)
 	" 还有拼音候选
 	if g:_yavimim_pinyin_in_matches
 		return 0
-	elseif len >= length_checking
+	elseif len >= max([length_checking, s:user_length])
 		return 1
 	endif
 	if g:_yavimim_only && g:yavimim_auto_commit
@@ -445,33 +445,22 @@ endfunction
 function! yavimim#backend#max_keys()
 	let im = yavimim#backend#getim()
 	if has_key(im, 'PinyinLength')
-		return max([im.Length, im.PinyinLength]) + 1
+		return max([im.Length, im.PinyinLength, s:user_length]) + 1
 	else
-		return 4 + 1
+		return max([4 + 1, s:user_length])
 	endif
 endfunction
 "===============================================================================
 " 用户码表
 "===============================================================================
-function! s:enabled_user()
-	let s:user_lines = []
-	let dir = g:yavimim_user_dir
-	if empty(dir)
-		" @TODO: windows
-		let dir = '~/.yavimim/'
-	endif
-	let path = findfile("user.txt", expand(dir))
-	if !filereadable(path)
-		return 0
-	endif
-	let lines = readfile(path)
-	let s:user_lines = lines
-	return empty(s:user_lines) ? 0 : 1
-endfunction
-
 function! s:get_user_lines()
 	if !exists('s:user_lines')
-		call s:enabled_user()
+		let s:user_length = 0
+		let s:user_lines = []
+		let mb = yavimim#cache#get_user()
+		if !empty(mb)
+			let [s:user_lines, s:user_length] = mb
+		endif
 	endif
 	return s:user_lines
 endfunction
