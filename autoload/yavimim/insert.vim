@@ -198,7 +198,11 @@ function! s:mappings()
 	silent execute "lnoremap" s:map_args "]]" "<C-R>=yavimim#insert#vk()<CR>"
 	call s:lmap_numbers()
 	call s:lmap_letters()
-	silent execute "lnoremap <expr>" s:map_args "/ yavimim#insert#special('/')"
+	" @TODO: uppercase
+	for key in ['/', '{', '}']
+		silent execute "lnoremap <expr>" s:map_args key
+					\ printf("yavimim#insert#special('%s')", key)
+	endfor
 endfunction
 
 function! yavimim#insert#en()
