@@ -198,6 +198,7 @@ function! s:mappings()
 	silent execute "lnoremap" s:map_args "]]" "<C-R>=yavimim#insert#vk()<CR>"
 	call s:lmap_numbers()
 	call s:lmap_letters()
+	silent execute "lnoremap <expr>" s:map_args "/ yavimim#insert#special('/')"
 endfunction
 
 function! yavimim#insert#en()
@@ -360,6 +361,23 @@ function! s:lmap_letter_wubi(char)
 	let key .= a:char . '\<C-R>=g:do_waiting_commit()\<CR>' .
 				\ '\<C-R>=yavimim#insert#complete()\<CR>' .
 				\ '\<C-R>=g:do_trigger_completion()\<CR>'
+	silent execute printf('return "%s"', key)
+endfunction
+
+function! yavimim#insert#special(char)
+	if pumvisible()
+		" 检查 popup menu 是否高亮被选中
+		" :help popupmenu-completion
+		let now = getline(b:yavimim.cursor.line)
+					\[b:yavimim.cursor.column:col('.') - 2]
+		let key = ''
+		if now == b:yavimim.base && b:yavimim.pmenu == 0
+			let key .= '\<C-N>'
+		endif
+		let key .= '\<C-Y>\<C-R>=g:do_after_commit()\<CR>' . a:char
+	else
+		let key = a:char . '\<C-R>=g:set_after_insert_beside_chinese()\<CR>'
+	endif
 	silent execute printf('return "%s"', key)
 endfunction
 
