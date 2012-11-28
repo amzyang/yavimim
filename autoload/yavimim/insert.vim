@@ -298,8 +298,10 @@ function! yavimim#insert#backspace()
 	" 因为此时还没开始做退格操作，在删之后是4个就要做自动补全，所以在删之前是5个
 	" 对于混拼，则是计算拼音的长度
 	if step_left <= yavimim#backend#max_keys() && step_left > 0
-		let key .= '\<C-R>=yavimim#insert#complete()\<CR>' .
+		let key .= '\<C-R>=g:do_waiting_commit().yavimim#insert#complete()\<CR>' .
 					\ '\<C-R>=g:do_trigger_completion()\<CR>'
+	elseif step_left == 0
+		let key .= '\<C-R>=g:do_after_cancel()\<CR>'
 	endif
 	silent execute printf('return "%s"', key)
 endfunction
