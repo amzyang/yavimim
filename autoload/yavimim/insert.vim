@@ -304,29 +304,18 @@ function! yavimim#insert#backspace()
 	silent execute printf('return "%s"', key)
 endfunction
 
-function! yavimim#insert#ctrl_e()
+function! yavimim#insert#enter()
+	let key = '\<CR>'
 	if b:yavimim.state == 1
-		let key = '\<C-R>=g:do_after_cancel()\<CR>'
-		if pumvisible()
-			let key .= '\<C-E>'
-		endif
-		let step = col('.') - 1 - b:yavimim.cursor.column
-		let key .= repeat('\<BS>', step)
-	else
-		let key = '\<C-E>'
+		let key = pumvisible() ? '\<C-E>' : ''
+		let key .= repeat('\<BS>', strlen(b:yavimim.base))
+		let key .= '\<C-R>=g:do_after_cancel()\<CR>'
 	endif
 	silent execute printf('return "%s"', key)
 endfunction
 
-function! yavimim#insert#enter()
-	if pumvisible()
-		let key = '\<C-Y>'
-	elseif b:yavimim.state == 1
-		let key = ''
-	else
-		let key = '\<CR>'
-	endif
-	let key .= '\<C-R>=g:do_after_cancel()\<CR>'
+function! yavimim#insert#ctrl_e()
+	let key = '\<C-E>\<C-R>=g:do_after_cancel()\<CR>'
 	silent execute printf('return "%s"', key)
 endfunction
 
