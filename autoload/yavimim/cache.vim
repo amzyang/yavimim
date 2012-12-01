@@ -43,15 +43,27 @@ function! yavimim#cache#validation_user()
 	return yavimim#cache#validation('user.txt', origin_path)
 endfunction
 
-function! yavimim#cache#user_create(mb)
+function! yavimim#cache#user_create(lines)
 	let path = expand(s:cache_dir.yavimim#cache#cache_name("user.txt"))
 	if !isdirectory(expand(s:cache_dir))
 		call mkdir(expand(s:cache_dir))
 	endif
-	let lines = copy(a:mb.lines)
-	call insert(lines, a:mb.maxlength)
-	call insert(lines, a:mb.version)
-	call writefile(lines, path)
+	let length = 0
+	let pattern = '\s+'
+	let result = []
+	for line in a:lines
+		if line =~ '^[;#]' || line =~ '^\s+$'
+			continue
+		endif
+		call add(result, yavimim#util#encoding(line))
+		let idx = max([stridx(line, ' '), stridx(line, '\t')])
+		let length = length < idx ? idx : length
+	endfor
+	call sort(result, "s:sort_user")
+	call insert(result, length)
+	call insert(result, s:cache_version)
+	call writefile(result, path)
+	return result
 endfunction
 
 " 用户码表格式
@@ -86,20 +98,17 @@ function! yavimim#cache#get_user()
 		endif
 	endif
 	let lines = readfile(path)
-	let length = 0
-	let pattern = '\s+'
-	let result = []
-	for line in lines
-		if line =~ '^[;#]' || line =~ '^\s+$'
-			continue
-		endif
-		call add(result, yavimim#util#encoding(line))
-		let idx = max([stridx(line, ' '), stridx(line, '\t')])
-		let length = length < idx ? idx : length
-	endfor
-	let mb={'lines':result, 'version':s:cache_version, 'maxlength': length}
-	call yavimim#cache#user_create(mb)
+	let result = yavimim#cache#user_create(lines)
+	call remove(result, 0)
+	let length = remove(result, 0)
 	return [result, length]
+endfunction
+
+function! s:sort_user(line1, line2)
+	let pattern = '\s+'
+	let key1 = split(a:line1, pattern)[0]
+	let key2 = split(a:line2, pattern)[0]
+	return key1 > key2
 endfunction
 
 function! yavimim#cache#clear(filename)
