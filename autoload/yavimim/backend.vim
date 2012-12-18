@@ -140,7 +140,7 @@ function! s:data_omni_align_kind(list)
 					\ strlen(item.kind) : max_length
 	endfor
 	for item in a:list
-		let item.kind = printf(printf("%%%ds", max_length), item.kind)
+		let item.kind = printf("%*s", max_length, item.kind)
 	endfor
 endfunction
 
