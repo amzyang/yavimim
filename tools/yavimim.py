@@ -12,6 +12,5 @@ def yavimim_status():
         im = vim.eval('yavimim#backend#getim()')
         name = 'name_cht' if traditional else 'name'
         contents = im[name].decode('utf8') + "." + sim_cht
-        contents = contents.encode('utf8')
-    return [{'contents': str(contents), "highlight_group": ['yavimim_status']}]
+    return [{'contents': contents, "highlight_group": ['yavimim_status']}]
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 textwidth=79
