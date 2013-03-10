@@ -91,10 +91,13 @@ endfunction
 function! s:toggle_options()
 	if &l:iminsert == 1
 		let &completeopt = b:yavimim.completeopt_saved
+		let &formatoptions = b:yavimim.formatoptions_saved
 	else
 		let b:yavimim.completeopt_saved = &completeopt
+		let b:yavimim.formatoptions_saved = &formatoptions
 		let b:yavimim.iminsert_saved = &l:iminsert
 		let &completeopt='menuone'
+		let &l:formatoptions.='v'
 	endif
 endfunction
 
