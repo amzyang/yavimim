@@ -10,4 +10,3 @@ function! Powerline#Functions#yavimim#status()
 	let name = 'name' . (g:yavimim_traditional ? '_cht' : '')
 	return im[name]."·".sim_cht
 endfunction
-
