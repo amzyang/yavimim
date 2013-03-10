@@ -97,7 +97,7 @@ function! s:toggle_options()
 		let b:yavimim.formatoptions_saved = &formatoptions
 		let b:yavimim.iminsert_saved = &l:iminsert
 		let &completeopt='menuone'
-		let &l:formatoptions.='v'
+		let &l:formatoptions.='1vw'
 	endif
 endfunction
 
