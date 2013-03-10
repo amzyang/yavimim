@@ -40,8 +40,14 @@ let g:yavimim_user_dir = get(g:, 'yavimim_user_dir', s:user_dir)
 "===============================================================================
 " 主程序
 "===============================================================================
-inoremap <silent> <expr>  yavimim#toggle_insert()
-cnoremap <silent> <expr>  yavimim#toggle_cmdline()
+let g:yavimim_key_trigger =
+			\ get(g:, 'yavimim_key_trigger', ['', '<C-Space>', '<Nul>'])
+for key in g:yavimim_key_trigger
+	silent execute printf(
+				\ "inoremap <silent> <expr> %s yavimim#toggle_insert()", key)
+	silent execute printf(
+				\ "cnoremap <silent> <expr> %s yavimim#toggle_cmdline()", key)
+endfor
 
 " usage
 " YDebug b:yavimim,g:yavimim
