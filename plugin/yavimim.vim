@@ -40,14 +40,19 @@ let g:yavimim_user_dir = get(g:, 'yavimim_user_dir', s:user_dir)
 "===============================================================================
 " 主程序
 "===============================================================================
-let g:yavimim_key_trigger =
-			\ get(g:, 'yavimim_key_trigger', ['', '<C-Space>', '<Nul>'])
-for key in g:yavimim_key_trigger
+let g:yavimim_key_trigger = get(g:, 'yavimim_key_trigger', '')
+let s:key_trigger = [g:yavimim_key_trigger]
+" hack, <C-Space> maybe <Nul> in terminal. I didn't fully test this behavior.
+if g:yavimim_key_trigger ==? '<C-Space>' && !has("gui_running")
+	let s:key_trigger += ['<Nul>']
+endif
+for key in s:key_trigger
 	silent execute printf(
 				\ "inoremap <silent> <expr> %s yavimim#toggle_insert()", key)
 	silent execute printf(
 				\ "cnoremap <silent> <expr> %s yavimim#toggle_cmdline()", key)
 endfor
+
 
 " usage
 " YDebug b:yavimim,g:yavimim
