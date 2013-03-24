@@ -2,7 +2,7 @@
 import vim
 
 
-def yavimim_status():
+def yavimim_status(pl):
     buffer_iminsert = int(vim.eval("&l:iminsert"))
     if buffer_iminsert != 1:
         return None
