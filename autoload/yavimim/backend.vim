@@ -110,9 +110,8 @@ function! yavimim#backend#matches(key)
 						\ total_nr, words[0].kind)
 		endif
 		call s:data_omni_align_kind(words)
-	else
-		let g:_yavimim_total_nr = total_nr
 	endif
+	let g:_yavimim_total_nr = total_nr
 	return words
 endfunction
 

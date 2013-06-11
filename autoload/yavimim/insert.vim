@@ -151,9 +151,21 @@ endfunction
 " ==============================================================================
 " key mappings
 " ==============================================================================
-function! s:incre_helper(incre)
-	return printf("yavimim#insert#page(%d) .
-				\ '<C-E><C-R>=yavimim#insert#complete()<CR><C-P>' :", a:incre)
+function! g:incre_helper(incre, extra)
+	if pumvisible() && g:_yavimim_total_nr == 1
+		let key = ''
+		if b:yavimim.pmenu == 0
+			let key = '\<C-N>'
+		endif
+		let key .= '\<C-Y>\<C-R>=g:do_after_commit()\<CR>' . a:extra
+	elseif pumvisible() && g:_yavimim_total_nr > 1
+		let key = printf("\<C-R>=yavimim#insert#page(%d)\<CR>" .
+					\ "\<C-E>" .
+					\ "\<C-R>=yavimim#insert#complete()\<CR>\<C-P>", a:incre)
+	else
+		let key = a:extra
+	endif
+	silent execute printf('return "%s"', key)
 endfunction
 function! s:mappings()
 	" binding all keys
@@ -178,24 +190,14 @@ function! s:mappings()
 				\ "<C-R>=g:change_cursor_pmenu_position(-1)<CR><Up>"
 	silent execute "lnoremap" s:map_args "<Down>"
 				\ "<C-R>=g:change_cursor_pmenu_position(1)<CR><Down>"
-	silent execute "lnoremap <expr>" s:map_args "-"
-				\ "pumvisible() ?"
-				\ s:incre_helper(-1)
-				\ "'-'"
-	silent execute "lnoremap <expr>" s:map_args "<PageUp>"
-				\ "pumvisible() ?"
-				\ s:incre_helper(-1)
-				\ "'<PageUp>'"
-	silent execute "lnoremap <expr>" s:map_args "="
-				\ "pumvisible() ?"
-				\ s:incre_helper(1)
-				\ "'='"
-	silent execute "lnoremap <expr>" s:map_args "<PageDown>"
-				\ "pumvisible() ?"
-				\ s:incre_helper(1)
-				\ "'<PageDown>'"
-	" silent execute "lnoremap" s:map_args "<C-U>"
-				" \ "<C-R>=g:do_after_cancel()<CR><C-U>"
+	silent execute "lnoremap" s:map_args "-"
+				\ "<C-R>=g:incre_helper(-1, '-')<CR>"
+	silent execute "lnoremap" s:map_args "="
+				\ "<C-R>=g:incre_helper(1, '=')<CR>"
+	silent execute "lnoremap" s:map_args "<PageUp>"
+				\ "<C-R>=g:incre_helper(-1, '')<CR>"
+	silent execute "lnoremap" s:map_args "<PageDown>"
+				\ "<C-R>=g:incre_helper(1, '')<CR>"
 	call s:lmap_punctuations()
 	silent execute "lnoremap" s:map_args ";;" "<C-R>=yavimim#insert#en()<CR>"
 	silent execute "lnoremap" s:map_args "]]" "<C-R>=yavimim#insert#vk()<CR>"
@@ -350,6 +352,7 @@ function! s:lmap_letter_wubi(char)
 	" 五笔
 	" 检测我们是否已经输入四个可用字母，此时就可以上屏了
 	let b:yavimim.page_nr = 1
+	let b:yavimim.pmenu = 0
 	call s:fix_cursor_position()
 	let l:len = col('.') - b:yavimim.cursor.column - 1
 	let key = ''
