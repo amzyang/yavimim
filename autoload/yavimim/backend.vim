@@ -394,10 +394,10 @@ function! s:s2t(chars)
 		let percent = len(lines) / 25
 		for line in lines
 			if idx % percent == 0
-				 let finished = idx / percent
-				 let left = 25 - finished
-				 let progress = repeat('=', finished) . repeat('-', left) . '>'
-				 call yavimim#util#show_message(tip.progress)
+				let finished = idx / percent
+				let left = 25 - finished
+				let progress = repeat('=', finished) . repeat('-', left) . '>'
+				call yavimim#util#show_message(tip.progress)
 			endif
 			let line = s:encoding(line)
 			let s:s2t_lines[char2nr(line)] = line
