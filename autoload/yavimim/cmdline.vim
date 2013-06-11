@@ -107,13 +107,22 @@ function! yavimim#cmdline#letter(char)
 			endif
 		" -=翻页
 		elseif index(["-", "=", "\<PageUp>", "\<PageDown>"], char) >= 0
-			if index(["-", "\<PageUp>"], char) >= 0
-				let g:_yavimim_page_nr -= 1
+			if g:_yavimim_total_nr <= 1
+				if index(["-", "="], char) >= 0
+					return s:do_commit().char
+				else
+					let s:match_lists = yavimim#backend#matches(s:keys)
+					call s:echo()
+				endif
 			else
-				let g:_yavimim_page_nr += 1
+				if index(["-", "\<PageUp>"], char) >= 0
+					let g:_yavimim_page_nr -= 1
+				else
+					let g:_yavimim_page_nr += 1
+				endif
+				let s:match_lists = yavimim#backend#matches(s:keys)
+				call s:echo()
 			endif
-			let s:match_lists = yavimim#backend#matches(s:keys)
-			call s:echo()
 		" lowercase character
 		elseif char =~ '\l'
 			let s:match_lists = yavimim#backend#matches(s:keys)
