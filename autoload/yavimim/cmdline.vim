@@ -54,7 +54,7 @@ function! yavimim#cmdline#letter(char)
 	call s:echo()
 	while 1
 		let nr = getchar()
-		let char = type(nr) == type(0) ? nr2char(nr) : ''
+		let char = type(nr) == type(0) ? nr2char(nr) : nr
 		
 		" backspace/ctrl-h
 		if nr == "\<BS>" || nr == 8
