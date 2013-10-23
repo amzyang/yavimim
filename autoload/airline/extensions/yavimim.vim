@@ -15,6 +15,9 @@ function! airline#extensions#yavimim#get_yavimim()
   endif
   let sim_cht = g:yavimim_traditional ? '繁' : '简'
   let im = yavimim#backend#getim()
+  if empty(im)
+	  return ''
+  endif
   let name = 'name' . (g:yavimim_traditional ? '_cht' : '')
   return ' '.g:airline_left_alt_sep.' '.im[name]."·".sim_cht
 endfunction

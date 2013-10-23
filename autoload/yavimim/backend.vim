@@ -422,7 +422,11 @@ endfunction
 
 function! yavimim#backend#getim()
 	" @TODO deepcopy/copy
-	return s:yavimim.backends[g:yavimim_im]
+	let backends = get(s:yavimim, 'backends')
+	if empty(backends)
+		return 0
+	endif
+	return get(s:yavimim.backends, g:yavimim_im, 0)
 endfunction
 
 function! yavimim#backend#should_auto_commit(...)
