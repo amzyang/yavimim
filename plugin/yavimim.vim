@@ -60,6 +60,7 @@ endfor
 " @TODO: 添加自定义补全，把 yavimim 中的脚本域的变量名和函数名全部加上
 command -nargs=* -complete=var YDebug call yavimim#debug(<f-args>)
 augroup YaVimIM
+	autocmd!
 	autocmd VimEnter *
 				\ if exists('g:Powerline_loaded') && g:Powerline_loaded
 				\ | call Pl#Theme#RemoveSegment('yavimim:statusline')
