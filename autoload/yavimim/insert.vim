@@ -16,8 +16,10 @@ function! yavimim#insert#toggle(...)
 	endif
 	call s:set_cursor_position()
 	if &l:iminsert != 1
+		call s:load_autocmd()
 		call s:mappings()
 	else
+		call s:unload_autocmd()
 		lmapclear <buffer>
 		lmapclear
 	endif
@@ -74,18 +76,28 @@ function! s:init_buffer()
 	let b:yavimim.pmenu = 0
 	let b:yavimim.base = ''
 	let b:yavimim.page_nr = 1
-	autocmd YaVimIM CursorMovedI <buffer> call s:yavimim_cursor_movedi()
-	autocmd YaVimIM InsertEnter <buffer> call s:yavimim_start_insert()
-	autocmd YaVimIM InsertLeave <buffer>
-				\ call g:Do_after_cancel()
-				\ | let b:yavimim.tmp = &l:iminsert
-				\ | let &l:iminsert = b:yavimim.iminsert_saved
-				\ | let b:yavimim.iminsert_saved = b:yavimim.tmp
-				\ | let &l:imsearch = 0
-	autocmd YaVimIM BufWinEnter <buffer>
-				\ if !exists('b:vimim') && &l:modifiable
-				\ | let &l:iminsert = 0
-				\ | endif
+endfunction
+
+function! s:load_autocmd()
+	augroup YaVimIMInsert
+		autocmd!
+		autocmd CursorMovedI <buffer> call s:yavimim_cursor_movedi()
+		autocmd InsertEnter <buffer> call s:yavimim_start_insert()
+		autocmd InsertLeave <buffer>
+					\ call g:Do_after_cancel()
+					\ | let b:yavimim.tmp = &l:iminsert
+					\ | let &l:iminsert = b:yavimim.iminsert_saved
+					\ | let b:yavimim.iminsert_saved = b:yavimim.tmp
+					\ | let &l:imsearch = 0
+		autocmd BufWinEnter <buffer>
+					\ if !exists('b:vimim') && &l:modifiable
+					\ | let &l:iminsert = 0
+					\ | endif
+augroup END
+endfunction
+
+function! s:unload_autocmd()
+	autocmd! YaVimIMInsert
 endfunction
 
 function! s:toggle_options()
