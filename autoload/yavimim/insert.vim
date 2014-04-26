@@ -77,7 +77,7 @@ function! s:init_buffer()
 	autocmd YaVimIM CursorMovedI <buffer> call s:yavimim_cursor_movedi()
 	autocmd YaVimIM InsertEnter <buffer> call s:yavimim_start_insert()
 	autocmd YaVimIM InsertLeave <buffer>
-				\ call g:do_after_cancel()
+				\ call g:Do_after_cancel()
 				\ | let b:yavimim.tmp = &l:iminsert
 				\ | let &l:iminsert = b:yavimim.iminsert_saved
 				\ | let b:yavimim.iminsert_saved = b:yavimim.tmp
@@ -101,14 +101,14 @@ function! s:toggle_options()
 	endif
 endfunction
 
-function! g:change_cursor_pmenu_position(change)
+function! g:Change_cursor_pmenu_position(change)
 	if pumvisible() && b:yavimim.state == 1
 		let b:yavimim.pmenu += a:change
 	endif
 	return ''
 endfunction
 
-function! g:do_after_commit()
+function! g:Do_after_commit()
 	let b:yavimim.state = 0
 	let b:yavimim.pmenu = 0
 	call s:set_cursor_position()
@@ -116,21 +116,21 @@ function! g:do_after_commit()
 	return ''
 endfunction
 
-function! g:do_waiting_commit()
+function! g:Do_waiting_commit()
 	" 开始中文输入中
 	let b:yavimim.state = 1
 	call yavimim#highlight#predict()
 	return ''
 endfunction
 
-function! g:do_after_cancel()
+function! g:Do_after_cancel()
 	let b:yavimim.state = 0
 	call s:set_cursor_position()
 	call yavimim#highlight#clear()
 	return ''
 endfunction
 
-function! g:set_after_insert_beside_chinese()
+function! g:Set_after_insert_beside_chinese()
 	" 输入的不是中文汉字
 	let b:yavimim.state = 0
 	call s:set_cursor_position()
@@ -138,10 +138,10 @@ function! g:set_after_insert_beside_chinese()
 	return ''
 endfunction
 
-function! g:do_trigger_completion()
+function! g:Do_trigger_completion()
 	if pumvisible() && yavimim#backend#should_auto_commit()
 		silent execute printf('return "%s"',
-					\ '\<C-Y>\<C-R>=g:do_after_commit()\<CR>')
+					\ '\<C-Y>\<C-R>=g:Do_after_commit()\<CR>')
 	endif
 	if pumvisible()
 		silent execute printf('return "%s"', '\<C-P>')
@@ -151,13 +151,13 @@ endfunction
 " ==============================================================================
 " key mappings
 " ==============================================================================
-function! g:incre_helper(incre, extra)
+function! g:Incre_helper(incre, extra)
 	if pumvisible() && g:_yavimim_total_nr == 1
 		let key = ''
 		if b:yavimim.pmenu == 0
 			let key = '\<C-N>'
 		endif
-		let key .= '\<C-Y>\<C-R>=g:do_after_commit()\<CR>' . a:extra
+		let key .= '\<C-Y>\<C-R>=g:Do_after_commit()\<CR>' . a:extra
 	elseif pumvisible() && g:_yavimim_total_nr > 1
 		let key = printf("\<C-R>=yavimim#insert#page(%d)\<CR>" .
 					\ "\<C-E>" .
@@ -181,23 +181,23 @@ function! s:mappings()
 				\ "<C-R>=yavimim#insert#backspace()<CR>"
 	" 只在补全可见时禁用，其它时候可用
 	lnoremap <expr> <silent> <buffer> <Home>
-				\ "<Home>".(pumvisible() ? g:do_after_cancel() : '')
+				\ "<Home>".(pumvisible() ? g:Do_after_cancel() : '')
 	lnoremap <expr> <silent> <buffer> <End>
-				\ "<End>".(pumvisible() ? g:do_after_cancel() : '')
+				\ "<End>".(pumvisible() ? g:Do_after_cancel() : '')
 	silent execute "lnoremap" s:map_args "<C-E>"
 				\ "<C-R>=yavimim#insert#ctrl_e()<CR>"
 	silent execute "lnoremap" s:map_args "<Up>"
-				\ "<C-R>=g:change_cursor_pmenu_position(-1)<CR><Up>"
+				\ "<C-R>=g:Change_cursor_pmenu_position(-1)<CR><Up>"
 	silent execute "lnoremap" s:map_args "<Down>"
-				\ "<C-R>=g:change_cursor_pmenu_position(1)<CR><Down>"
+				\ "<C-R>=g:Change_cursor_pmenu_position(1)<CR><Down>"
 	silent execute "lnoremap" s:map_args "-"
-				\ "<C-R>=g:incre_helper(-1, '-')<CR>"
+				\ "<C-R>=g:Incre_helper(-1, '-')<CR>"
 	silent execute "lnoremap" s:map_args "="
-				\ "<C-R>=g:incre_helper(1, '=')<CR>"
+				\ "<C-R>=g:Incre_helper(1, '=')<CR>"
 	silent execute "lnoremap" s:map_args "<PageUp>"
-				\ "<C-R>=g:incre_helper(-1, '')<CR>"
+				\ "<C-R>=g:Incre_helper(-1, '')<CR>"
 	silent execute "lnoremap" s:map_args "<PageDown>"
-				\ "<C-R>=g:incre_helper(1, '')<CR>"
+				\ "<C-R>=g:Incre_helper(1, '')<CR>"
 	call s:lmap_punctuations()
 	silent execute "lnoremap" s:map_args ";;" "<C-R>=yavimim#insert#en()<CR>"
 	silent execute "lnoremap" s:map_args "]]" "<C-R>=yavimim#insert#vk()<CR>"
@@ -211,7 +211,7 @@ function! s:mappings()
 endfunction
 
 function! yavimim#insert#en()
-	call g:do_after_cancel()
+	call g:Do_after_cancel()
 	echohl YaVimIMComment
 	call inputsave()
 	let key = input('>>')
@@ -222,9 +222,9 @@ endfunction
 
 function! yavimim#insert#vk()
 	if pumvisible()
-		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
+		let key = '\<C-N>\<C-Y>\<C-R>=g:Do_after_commit()\<CR>'
 	else
-		let key = '\<C-R>=g:do_after_cancel()\<CR>'
+		let key = '\<C-R>=g:Do_after_cancel()\<CR>'
 	endif
 	let key .= "\<C-R>=yavimim#vk#vk()\<CR>"
 	silent execute printf('return "%s"', key)
@@ -273,7 +273,7 @@ endfunction
 function! yavimim#insert#punctuation(index)
 	let tran = yavimim#punctuation#trans()[a:index]
 	if pumvisible()
-		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
+		let key = '\<C-N>\<C-Y>\<C-R>=g:Do_after_commit()\<CR>'
 		let key .= tran
 	else
 		let key = tran
@@ -284,7 +284,7 @@ endfunction
 function! yavimim#insert#quote(type)
 	let tran = yavimim#punctuation#quote(a:type)
 	if pumvisible()
-		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
+		let key = '\<C-N>\<C-Y>\<C-R>=g:Do_after_commit()\<CR>'
 		let key .= tran
 	else
 		let key = tran
@@ -303,10 +303,10 @@ function! yavimim#insert#backspace()
 	" 因为此时还没开始做退格操作，在删之后是4个就要做自动补全，所以在删之前是5个
 	" 对于混拼，则是计算拼音的长度
 	if step_left > 0 && step_left <= yavimim#backend#max_keys()
-		let key .= '\<C-R>=g:do_waiting_commit().yavimim#insert#complete()\<CR>' .
-					\ '\<C-R>=g:do_trigger_completion()\<CR>'
+		let key .= '\<C-R>=g:Do_waiting_commit().yavimim#insert#complete()\<CR>' .
+					\ '\<C-R>=g:Do_trigger_completion()\<CR>'
 	elseif step_left == 0
-		let key .= '\<C-R>=g:do_after_cancel()\<CR>'
+		let key .= '\<C-R>=g:Do_after_cancel()\<CR>'
 	endif
 	silent execute printf('return "%s"', key)
 endfunction
@@ -316,13 +316,13 @@ function! yavimim#insert#enter()
 	if b:yavimim.state == 1
 		let key = pumvisible() ? '\<C-E>' : ''
 		let key .= repeat('\<BS>', strlen(b:yavimim.base))
-		let key .= '\<C-R>=g:do_after_cancel()\<CR>'
+		let key .= '\<C-R>=g:Do_after_cancel()\<CR>'
 	endif
 	silent execute printf('return "%s"', key)
 endfunction
 
 function! yavimim#insert#ctrl_e()
-	let key = '\<C-E>\<C-R>=g:do_after_cancel()\<CR>'
+	let key = '\<C-E>\<C-R>=g:Do_after_cancel()\<CR>'
 	silent execute printf('return "%s"', key)
 endfunction
 
@@ -337,7 +337,7 @@ function! yavimim#insert#number(number)
 		let direction = minus > 0 ? '\<Down>' : '\<Up>'
 		let l:key = repeat(direction, step) . '\<C-Y>'
 		silent execute printf('return "%s%s"', l:key,
-					\ '\<C-R>=g:do_after_commit()\<CR>')
+					\ '\<C-R>=g:Do_after_commit()\<CR>')
 	else
 		return l:number
 	endif
@@ -357,11 +357,11 @@ function! s:lmap_letter_wubi(char)
 	let l:len = col('.') - b:yavimim.cursor.column - 1
 	let key = ''
 	if pumvisible() && yavimim#backend#should_auto_commit(l:len)
-		let key = '\<C-N>\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
+		let key = '\<C-N>\<C-Y>\<C-R>=g:Do_after_commit()\<CR>'
 	endif
-	let key .= a:char . '\<C-R>=g:do_waiting_commit()\<CR>' .
+	let key .= a:char . '\<C-R>=g:Do_waiting_commit()\<CR>' .
 				\ '\<C-R>=yavimim#insert#complete()\<CR>' .
-				\ '\<C-R>=g:do_trigger_completion()\<CR>'
+				\ '\<C-R>=g:Do_trigger_completion()\<CR>'
 	silent execute printf('return "%s"', key)
 endfunction
 
@@ -375,9 +375,9 @@ function! yavimim#insert#special(char)
 		if now == b:yavimim.base && b:yavimim.pmenu == 0
 			let key .= '\<C-N>'
 		endif
-		let key .= '\<C-Y>\<C-R>=g:do_after_commit()\<CR>' . a:char
+		let key .= '\<C-Y>\<C-R>=g:Do_after_commit()\<CR>' . a:char
 	else
-		let key = a:char . '\<C-R>=g:set_after_insert_beside_chinese()\<CR>'
+		let key = a:char . '\<C-R>=g:Set_after_insert_beside_chinese()\<CR>'
 	endif
 	silent execute printf('return "%s"', key)
 endfunction
@@ -392,9 +392,9 @@ function! yavimim#insert#space()
 		if now == b:yavimim.base && b:yavimim.pmenu == 0
 			let key .= '\<C-N>'
 		endif
-		let key .= '\<C-Y>\<C-R>=g:do_after_commit()\<CR>'
+		let key .= '\<C-Y>\<C-R>=g:Do_after_commit()\<CR>'
 	else
-		let key = '\<Space>\<C-R>=g:set_after_insert_beside_chinese()\<CR>'
+		let key = '\<Space>\<C-R>=g:Set_after_insert_beside_chinese()\<CR>'
 	endif
 	silent execute printf('return "%s"', key)
 endfunction
