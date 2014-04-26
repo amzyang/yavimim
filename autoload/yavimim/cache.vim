@@ -74,7 +74,7 @@ function! yavimim#cache#user_load()
 	let cache = yavimim#cache#cache_name('user.txt')
 	let cache_path = findfile(cache, expand(s:cache_dir))
 	let lines = readfile(cache_path)
-	let maxlength = lines[1]
+	let maxlength = lines[0]
 	call remove(lines, 0, 1)
 	return [lines, maxlength]
 endfunction
