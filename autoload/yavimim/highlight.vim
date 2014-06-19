@@ -13,9 +13,15 @@ function! yavimim#highlight#clear()
 endfunction
 
 function! yavimim#highlight#highlight(lnum, start, end)
-	let pattern = printf("\\%%%sl\\%%>%dc.*\\%%<%dc", a:lnum, a:start, a:end)
 	call yavimim#highlight#clear()
-	let w:yavimim_highlight_id = matchadd('YaVimIM', pattern)
+	if v:version > 704 || v:version == 704 && has("patch340")
+		let l:start = a:start + 1
+		let l:length = a:end - l:start
+		let w:yavimim_highlight_id = matchaddpos('YaVimIM', [[a:lnum, l:start, l:length]])
+	else
+		let pattern = printf("\\%%%sl\\%%>%dc.*\\%%<%dc", a:lnum, a:start, a:end)
+		let w:yavimim_highlight_id = matchadd('YaVimIM', pattern)
+	endif
 	return ''
 endfunction
 
