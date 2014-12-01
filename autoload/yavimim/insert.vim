@@ -18,13 +18,12 @@ function! yavimim#insert#toggle(...)
 	if &l:iminsert != 1
 		let b:keymap_name = yavimim#backend#keymap_name()
 		call s:load_autocmd()
-		call s:mappings()
+		return nr2char(yavimim#util#keycode('langmap'))
 	else
+		call feedkeys(nr2char(yavimim#util#keycode('langmap')), 'n')
 		call s:unload_autocmd()
-		lmapclear <buffer>
-		lmapclear
+		return ''
 	endif
-	return nr2char(yavimim#util#keycode('langmap'))
 endfunction
 
 function! s:plugin_compatible()
@@ -53,9 +52,6 @@ function! s:yavimim_start_insert()
 	let b:yavimim.tmp = &l:iminsert
 	let &l:iminsert = b:yavimim.iminsert_saved
 	let b:yavimim.iminsert_saved = b:yavimim.tmp
-	if &l:iminsert == 1
-		call s:mappings()
-	endif
 endfunction
 
 function! s:reset_start_insert()
@@ -77,6 +73,7 @@ function! s:init_buffer()
 	let b:yavimim.pmenu = 0
 	let b:yavimim.base = ''
 	let b:yavimim.page_nr = 1
+	call s:mappings()
 endfunction
 
 function! s:load_autocmd()

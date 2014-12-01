@@ -40,7 +40,7 @@ let g:yavimim_user_dir = get(g:, 'yavimim_user_dir', s:user_dir)
 "===============================================================================
 " 主程序
 "===============================================================================
-let g:yavimim_key_trigger = get(g:, 'yavimim_key_trigger', '')
+let g:yavimim_key_trigger = get(g:, 'yavimim_key_trigger', nr2char(30))
 let s:key_trigger = [g:yavimim_key_trigger]
 " hack, <C-Space> maybe <Nul> in terminal. I didn't fully test this behavior.
 if g:yavimim_key_trigger ==? '<C-Space>' && !has("gui_running")
