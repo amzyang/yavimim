@@ -16,6 +16,7 @@ function! yavimim#insert#toggle(...)
 	endif
 	call s:set_cursor_position()
 	if &l:iminsert != 1
+		let b:keymap_name = yavimim#backend#keymap_name()
 		call s:load_autocmd()
 		call s:mappings()
 	else

@@ -355,8 +355,22 @@ function! yavimim#backend#setup_backend()
 		endif
 	endif
 	if !exists('g:yavimim_im') || index(user_ims, g:yavimim_im) == -1
-		let g:yavimim_im = user_ims[0]
+		let l:im = user_ims[0]
+		let g:yavimim_im = l:im
 	endif
+endfunction
+
+function! yavimim#backend#keymap_name()
+	if !exists('g:yavimim_im')
+		return ''
+	endif
+	let sim_cht = g:yavimim_traditional ? '繁' : '简'
+	let im = yavimim#backend#getim()
+	if empty(im)
+		return ''
+	endif
+	let name = 'name' . (g:yavimim_traditional ? '_cht' : '')
+	return im[name]."·".sim_cht
 endfunction
 
 function! s:getpath(im)
