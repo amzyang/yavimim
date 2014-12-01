@@ -92,6 +92,10 @@ yet another vim input method
 
 **TODO**
 
+* fixed signle repeats
+
+  :help .
+
 用户选项
 _________
 
