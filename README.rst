@@ -96,6 +96,8 @@ yet another vim input method
 
   :help .
 
+* v:char and InsertCharPre
+
 用户选项
 _________
 
