@@ -181,8 +181,8 @@ function! s:lmap_punctuations()
 	" double/single/square quote
 	let quotes = {'single': "'", 'double': '"', 'square': ']'}
 	for [type, quote] in items(quotes)
-		silent execute "lnoremap" s:map_args quote
-					\ printf("<C-R>=yavimim#cmdline#quote('%s')<CR>", type)
+		silent execute "lnoremap <expr>" s:map_args quote
+					\ printf("yavimim#cmdline#quote('%s')", type)
 	endfor
 endfunction
 

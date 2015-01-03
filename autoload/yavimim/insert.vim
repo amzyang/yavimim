@@ -181,36 +181,36 @@ function! s:mappings()
 	" binding all keys
 	lmapclear
 	lmapclear <buffer>
-	silent execute "lnoremap" s:map_args "<CR>"
-				\ "<C-R>=yavimim#insert#enter()<CR>"
-	silent execute "lnoremap" s:map_args "<Space>"
-				\ "<C-R>=yavimim#insert#space()<CR>"
-	silent execute "lnoremap" s:map_args "<BS>"
-				\ "<C-R>=yavimim#insert#backspace()<CR>"
-	silent execute "lnoremap" s:map_args "<C-H>"
-				\ "<C-R>=yavimim#insert#backspace()<CR>"
+	silent execute "lnoremap <expr>" s:map_args "<CR>"
+				\ "yavimim#insert#enter()"
+	silent execute "lnoremap <expr>" s:map_args "<Space>"
+				\ "yavimim#insert#space()"
+	silent execute "lnoremap <expr>" s:map_args "<BS>"
+				\ "yavimim#insert#backspace()"
+	silent execute "lnoremap <expr>" s:map_args "<C-H>"
+				\ "yavimim#insert#backspace()"
 	" 只在补全可见时禁用，其它时候可用
 	lnoremap <expr> <silent> <buffer> <Home>
 				\ "<Home>".(pumvisible() ? g:Do_after_cancel() : '')
 	lnoremap <expr> <silent> <buffer> <End>
 				\ "<End>".(pumvisible() ? g:Do_after_cancel() : '')
-	silent execute "lnoremap" s:map_args "<C-E>"
-				\ "<C-R>=yavimim#insert#ctrl_e()<CR>"
+	silent execute "lnoremap <expr>" s:map_args "<C-E>"
+				\ "yavimim#insert#ctrl_e()"
 	silent execute "lnoremap" s:map_args "<Up>"
 				\ "<C-R>=g:Change_cursor_pmenu_position(-1)<CR><Up>"
 	silent execute "lnoremap" s:map_args "<Down>"
 				\ "<C-R>=g:Change_cursor_pmenu_position(1)<CR><Down>"
-	silent execute "lnoremap" s:map_args "-"
-				\ "<C-R>=g:Incre_helper(-1, '-')<CR>"
-	silent execute "lnoremap" s:map_args "="
-				\ "<C-R>=g:Incre_helper(1, '=')<CR>"
-	silent execute "lnoremap" s:map_args "<PageUp>"
-				\ "<C-R>=g:Incre_helper(-1, '')<CR>"
-	silent execute "lnoremap" s:map_args "<PageDown>"
-				\ "<C-R>=g:Incre_helper(1, '')<CR>"
+	silent execute "lnoremap <expr>" s:map_args "-"
+				\ "g:Incre_helper(-1, '-')"
+	silent execute "lnoremap <expr>" s:map_args "="
+				\ "g:Incre_helper(1, '=')"
+	silent execute "lnoremap <expr>" s:map_args "<PageUp>"
+				\ "g:Incre_helper(-1, '')"
+	silent execute "lnoremap <expr>" s:map_args "<PageDown>"
+				\ "g:Incre_helper(1, '')"
 	call s:lmap_punctuations()
-	silent execute "lnoremap" s:map_args ";;" "<C-R>=yavimim#insert#en()<CR>"
-	silent execute "lnoremap" s:map_args "]]" "<C-R>=yavimim#insert#vk()<CR>"
+	silent execute "lnoremap <expr>" s:map_args ";;" "yavimim#insert#en()"
+	silent execute "lnoremap <expr>" s:map_args "]]" "yavimim#insert#vk()"
 	call s:lmap_numbers()
 	call s:lmap_letters()
 	" @TODO: uppercase
@@ -247,25 +247,25 @@ function! s:lmap_punctuations()
 	while index < len(origins)
 		let origin = origins[index]
 		let tran = trans[index]
-		silent execute "lnoremap" s:map_args origin
-					\ "<C-R>=yavimim#insert#punctuation(".index.")<CR>"
+		silent execute "lnoremap <expr>" s:map_args origin
+					\ "yavimim#insert#punctuation(".index.")"
 		let index += 1
 	endwhile
 
 	" single/double/square quote
 	let quotes = {'single': "'", 'double': '"', 'square': ']'}
 	for [type, quote] in items(quotes)
-		silent execute printf("lnoremap %s %s %s",
+		silent execute printf("lnoremap <expr> %s %s %s",
 					\ s:map_args,
 					\ quote,
-					\ printf("<C-R>=yavimim#insert#quote('%s')<CR>", type))
+					\ printf("yavimim#insert#quote('%s')", type))
 	endfor
 endfunction
 
 function! s:lmap_numbers()
 	for l:number in range(10)
-		silent execute "lnoremap" s:map_args l:number
-					\ "<C-R>=yavimim#insert#number(".l:number.")<CR>"
+		silent execute "lnoremap <expr>" s:map_args l:number
+					\ "yavimim#insert#number(".l:number.")"
 	endfor
 endfunction
 
@@ -273,10 +273,10 @@ function! s:lmap_letters()
 	for nr in range(char2nr('a'), char2nr('z'))
 		let char = nr2char(nr)
 		silent execute
-					\ printf("lnoremap %s %s %s",
+					\ printf("lnoremap <expr> %s %s %s",
 					\ s:map_args,
 					\ char,
-					\ printf("<C-R>=yavimim#insert#letter('%s')<CR>", char))
+					\ printf("yavimim#insert#letter('%s')", char))
 	endfor
 endfunction
 
