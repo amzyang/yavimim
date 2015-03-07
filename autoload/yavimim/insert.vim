@@ -325,7 +325,6 @@ function! yavimim#insert#enter()
 	let key = '\<CR>'
 	if b:yavimim.state == 1
 		let key = pumvisible() ? '\<C-E>' : ''
-		let key .= repeat('\<BS>', strlen(b:yavimim.base))
 		let key .= '\<C-R>=g:Do_after_cancel()\<CR>'
 	endif
 	silent execute printf('return "%s"', key)
