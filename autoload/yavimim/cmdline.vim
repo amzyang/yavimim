@@ -108,12 +108,8 @@ function! yavimim#cmdline#letter(char)
 		" -=翻页
 		elseif index(["-", "=", "\<PageUp>", "\<PageDown>"], char) >= 0
 			if g:_yavimim_total_nr <= 1
-				if index(["-", "="], char) >= 0
-					return s:do_commit().char
-				else
-					let s:match_lists = yavimim#backend#matches(s:keys)
-					call s:echo()
-				endif
+				let s:match_lists = yavimim#backend#matches(s:keys)
+				call s:echo()
 			else
 				if index(["-", "\<PageUp>"], char) >= 0
 					let g:_yavimim_page_nr -= 1
