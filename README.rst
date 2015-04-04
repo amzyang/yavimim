@@ -1,7 +1,7 @@
 yavimim
 =======
 
-.. image:: https://github.com/grassofhust/grassofhust.github.com/raw/master/assets/yavimim.png
+.. image:: assets/yavimim.png
 
 yet another vim input method
 
