@@ -92,10 +92,6 @@ yet another vim input method
 
 **TODO**
 
-* fixed signle repeats
-
-  :help .
-
 * v:char and InsertCharPre
 
 用户选项
